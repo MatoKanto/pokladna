@@ -38,19 +38,23 @@ type Props = {
  *
  * Scéna začína zo samotného displeja: obrazovka vypĺňa celé okno a odráža sa v nej
  * tmavé sklo so svetelnými pásmi. Scrollom sa kamera vzďaľuje, objaví sa rám a telo
- * terminálu, pohľad sa z plochého (2D) plynule natáča do perspektívy (3D) a odlesk
- * sa rozplynie do UI aplikácie.
+ * terminálu, odlesk sa rozplynie do UI a terminál sa z čelného (2D) pohľadu plynule
+ * natočí do finálneho uhla (3D).
  *
- * Princíp: obrázok terminálu je už vyrenderovaný v perspektíve. Štyri rohy displeja
- * (QUAD) interpolujeme medzi "plochým" obdĺžnikom (FLAT) a skutočnou perspektívou
- * a z nich počítame homografiu → CSS matrix3d. Celú choreografiu riadi scroll
- * progress `p` (0 až 1) cez `deviceMatrix`.
+ * Princíp: máme dva rendery toho istého terminálu, FRONT (čelný) a ANGLED (natočený).
+ * Displej v oboch (FRONT_QUAD, QUAD) vždy zarovnáme na rovnaký štvoruholník D(t),
+ * ktorý sa mení z obdĺžnika (čelný pohľad) na skutočnú perspektívu (natočený pohľad).
+ * Obrázky sa tým deformujú homografiou (CSS matrix3d) a prelínajú, takže UI na
+ * displeji ostáva na mieste, kým sa telo (rukoväť, tlačiareň) postupne vynára.
+ * Celú choreografiu riadi scroll progress `p` (0 až 1).
  *
  *  0.00–0.12  nadpis sa rozmaže a zmizne
- *  0.00–0.42  odďaľovanie (zoom out), displej je plochý (2D)
- *  0.20–0.42  odlesk na displeji sa rozplynie do UI
- *  0.18–0.76  plynulé natáčanie z plochého displeja do uhla z PNG (finálny stav);
- *             väčšina je vidieť, keď je terminál už usadený v strede (pripnutý)
+ *  0.00–0.42  odďaľovanie (zoom out), displej je čelný (2D) a zakrytý tmavým sklom
+ *  0.18–0.76  plynulé natáčanie z čelného pohľadu do finálneho; väčšinu vidno, keď je
+ *             terminál už usadený v strede (pripnutý). Na konci je to presne ANGLED.
+ *  0.18–0.76  po skle displeja prechádza odlesk svetla (zvýrazňuje otáčanie)
+ *  0.56–0.76  sklo sa rozplynie a odhalí UI z PNG (UI nikdy neprelíname, aby sa
+ *             nezdvojil; prelínajú sa len telá terminálov pod sklom)
  *  od 0.78    ďalšia sekcia ho prekryje zdola
  *
  * Prekrytie zabezpečuje `Intro` so záporným horným okrajom 100svh. Začína sa pri
@@ -59,20 +63,22 @@ type Props = {
  */
 const HERO_HEIGHT = "h-[560svh]";
 const ZOOM_END = 0.42;
-// Natáčanie: z plochého displeja (2D) do uhla v PNG (finálny stav = PNG presne).
-// Beží plynulo od ROTATE_START do ROTATE_END, väčšinou už keď je terminál usadený.
-//  - `t` (homografia): displej sa z plochého obdĺžnika mení na skutočnú perspektívu,
-//  - `yaw` (3D): navyše sa terminál otáča okolo zvislej osi z YAW_START_DEG späť na 0.
-//    Je to rovnaký smer otáčania (doľava), takže pohyb je monotónny a viditeľnejší.
-// Na konci je t = 1, yaw = 0 a žiadny odlesk, teda presne obrázok z PNG.
 const ROTATE_START = 0.18;
 const ROTATE_END = 0.76;
-const YAW_START_DEG = 55;
-const PERSPECTIVE = 1200; // px
 
-// Rozmery zdrojového obrázka (public/images/terminal.webp)
+// ANGLED: natočený render (public/images/terminal.webp), finálny stav scény
 const IMG_W = 1128;
 const IMG_H = 1901;
+// FRONT: čelný render (public/images/terminal-front.webp)
+const FRONT_W = 648;
+const FRONT_H = 1588;
+// Displej (biela plocha UI) v čelnom rendri: obdĺžnik (TL, TR, BR, BL)
+const FRONT_QUAD: readonly Pt[] = [
+  [56, 303],
+  [591, 303],
+  [591, 1442],
+  [56, 1442],
+];
 // Rohy displeja v obrázku (TL, TR, BR, BL), zmerané z obrázka
 const QUAD: readonly Pt[] = [
   [133.0, 337.3],
@@ -80,10 +86,10 @@ const QUAD: readonly Pt[] = [
   [610.6, 1633.4],
   [134.5, 1611.8],
 ];
-// Skutočný (plochý) displej: výška ~ priemer ľavej a pravej hrany, pomer strán odhadnutý
-// tak, aby boli ikony v UI okrúhle.
+// Plochý displej v súradniciach ANGLED: výška ~ priemer ľavej a pravej hrany,
+// pomer strán z čelného rendra (535 × 1139).
 const FLAT_H = 1297;
-const FLAT_W = FLAT_H * 0.38;
+const FLAT_W = FLAT_H * (535 / 1139);
 const QUAD_CENTER: Pt = [
   QUAD.reduce((s, p) => s + p[0], 0) / 4,
   QUAD.reduce((s, p) => s + p[1], 0) / 4,
@@ -112,28 +118,36 @@ const REFLECTION_TRANSFORM = toMatrix3d(
 );
 const SCREEN_TRANSFORM = toMatrix3d(homography(FLAT_RECT, QUAD));
 
-/** CSS transformácia celej zostavy (obrázok + odlesk) pre daný scroll progress. */
-function deviceMatrix(p: number, vw: number, vh: number): string {
+/** Postup natáčania 0 (čelný pohľad) až 1 (finálny uhol), zjemnený na začiatku a konci. */
+function rotationProgress(p: number): number {
+  return smoothstep(clamp01((p - ROTATE_START) / (ROTATE_END - ROTATE_START)));
+}
+
+/** CSS transformácia jednej vrstvy (čelný alebo natočený render) pre daný scroll progress. */
+function deviceMatrix(
+  p: number,
+  vw: number,
+  vh: number,
+  layer: "front" | "angled",
+): string {
   if (!vw || !vh) return "none";
 
   // Cieľová veľkosť terminálu v strede (výška obrázka v px)
   const k = ((vw >= 1024 ? 0.74 : 0.68) * vh) / IMG_H;
 
-  // Počiatočný zoom: plochý displej pokrýva celé okno
+  // Počiatočný zoom: čelný displej pokrýva celé okno
   const zoom0 = Math.max(vw / (FLAT_W * k), vh / (FLAT_H * k)) * 1.25;
 
-  const zp = clamp01(p / ZOOM_END);
-  const ez = easeInOutSine(zp);
+  const ez = easeInOutSine(clamp01(p / ZOOM_END));
   const zoom = Math.exp(lerp(Math.log(zoom0), 0, ez));
-  // Postup natáčania 0 až 1 (zjemnený na začiatku a konci)
-  const u = smoothstep(clamp01((p - ROTATE_START) / (ROTATE_END - ROTATE_START)));
-  const t = u; // 0 = plochý displej, 1 = uhol v PNG
+  const t = rotationProgress(p); // 0 = čelný displej, 1 = uhol v PNG
 
+  // Cieľový štvoruholník displeja D(t): obdĺžnik → skutočná perspektíva
   const dst = QUAD.map((q, i) => [
     lerp(FLAT[i][0], q[0], t),
     lerp(FLAT[i][1], q[1], t),
   ]) as unknown as readonly Pt[];
-  const H = homography(QUAD, dst);
+  const H = homography(layer === "front" ? FRONT_QUAD : QUAD, dst);
 
   // Bod, ktorý drží stred okna: najprv stred displeja, nakoniec stred obrázka
   const fx = lerp(QUAD_CENTER[0], IMG_CENTER[0], ez);
@@ -143,12 +157,7 @@ function deviceMatrix(p: number, vw: number, vh: number): string {
     translate(vw / 2, vh / 2),
     mul(scale(k * zoom), mul(translate(-fx, -fy), H)),
   );
-  const yaw = YAW_START_DEG * (1 - u);
-  if (!yaw) return toMatrix3d(M);
-  // Rotácia okolo zvislej osi cez stred okna (tam je pri usadení terminál)
-  const cx = vw / 2;
-  const cy = vh / 2;
-  return `translate(${cx}px,${cy}px) perspective(${PERSPECTIVE}px) rotateY(${yaw}deg) translate(${-cx}px,${-cy}px) ${toMatrix3d(M)}`;
+  return toMatrix3d(M);
 }
 
 export function HeroScene(props: Props) {
@@ -227,12 +236,23 @@ function HeroAnimated({ title, titleAccent, scrollHint, imageAlt }: Props) {
   const titleScale = useTransform(p, [0, 0.12], [1, 0.94]);
   const hintOpacity = useTransform(p, [0, 0.04], [1, 0]);
 
-  // Zostava terminálu
-  const device = useTransform([p, vw, vh], ([pv, w, h]: number[]) =>
-    deviceMatrix(pv, w, h),
+  // Zostava terminálu: dve vrstvy (čelný a natočený render) so spoločným displejom
+  const deviceFront = useTransform([p, vw, vh], ([pv, w, h]: number[]) =>
+    deviceMatrix(pv, w, h, "front"),
   );
-  // Odlesk: drží sa do 0.28, potom sa rozplynie do UI; pásy sa pri natáčaní posúvajú
-  const reflectionOpacity = useTransform(p, [0.2, 0.42], [1, 0]);
+  const deviceAngled = useTransform([p, vw, vh], ([pv, w, h]: number[]) =>
+    deviceMatrix(pv, w, h, "angled"),
+  );
+  // Prelínanie: natočený render sa vynára, čelný ustúpi, na konci ostáva len natočený
+  const angledOpacity = useTransform(p, (pv) =>
+    smoothstep(clamp01((rotationProgress(pv) - 0.1) / 0.6)),
+  );
+  const frontOpacity = useTransform([p, vw], ([pv, w]: number[]) =>
+    w ? 1 - smoothstep(clamp01((rotationProgress(pv) - 0.4) / 0.35)) : 0,
+  );
+  // Sklo displeja zakrýva UI počas celého natáčania (UI v oboch renderoch nesedí presne,
+  // takže by sa pri prelínaní zdvojilo) a rozplynie sa až na konci do UI z PNG.
+  const reflectionOpacity = useTransform(p, [0.56, ROTATE_END], [1, 0]);
   // Odlesk svetla na displeji počas natáčania: objaví sa, prejde cez displej, na konci zmizne
   const sheenX = useTransform(p, [ROTATE_START, ROTATE_END], ["-42%", "42%"]);
   const sheenOpacity = useTransform(
@@ -243,7 +263,7 @@ function HeroAnimated({ title, titleAccent, scrollHint, imageAlt }: Props) {
 
   // pásy odlesku: posun podľa scrollu + jemný paralax podľa kurzora
   const streakX = useTransform([p, sx], ([pv, m]: number[]) => {
-    const scroll = lerp(10, -14, clamp01(pv / ZOOM_END));
+    const scroll = lerp(10, -14, clamp01(pv / ROTATE_END));
     return `${scroll + (m - 0.5) * 10}%`;
   });
 
@@ -261,26 +281,50 @@ function HeroAnimated({ title, titleAccent, scrollHint, imageAlt }: Props) {
           aria-hidden
         />
 
-        {/* terminál */}
+        {/* terminál: čelný render (spodná vrstva) */}
         <motion.div
           style={{
-            transform: device,
+            transform: deviceFront,
+            width: FRONT_W,
+            height: FRONT_H,
+            opacity: frontOpacity,
+          }}
+          className="absolute left-0 top-0 origin-top-left will-change-transform"
+        >
+          <Image
+            src="/images/terminal-front.webp"
+            alt=""
+            width={FRONT_W}
+            height={FRONT_H}
+            priority
+            quality={90}
+            draggable={false}
+            className="pointer-events-none block max-w-none select-none"
+          />
+        </motion.div>
+
+        {/* terminál: natočený render (finálny stav) + odlesky na displeji */}
+        <motion.div
+          style={{
+            transform: deviceAngled,
             width: IMG_W,
             height: IMG_H,
             opacity: deviceOpacity,
           }}
           className="absolute left-0 top-0 origin-top-left will-change-transform"
         >
-          <Image
-            src="/images/terminal.webp"
-            alt={imageAlt}
-            width={IMG_W}
-            height={IMG_H}
-            priority
-            quality={90}
-            draggable={false}
-            className="pointer-events-none block max-w-none select-none"
-          />
+          <motion.div style={{ opacity: angledOpacity }}>
+            <Image
+              src="/images/terminal.webp"
+              alt={imageAlt}
+              width={IMG_W}
+              height={IMG_H}
+              priority
+              quality={90}
+              draggable={false}
+              className="pointer-events-none block max-w-none select-none"
+            />
+          </motion.div>
           {/* odlesk na displeji */}
           <motion.div
             aria-hidden
