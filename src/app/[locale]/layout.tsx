@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import { DM_Sans } from "next/font/google";
 import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { routing } from "@/i18n/routing";
 import "@/styles/globals.css";
 
-// TODO: nahradiť fontom Besteron (zmena len tu)
-const fontSans = Geist({
+// Dočasne font témy Vermillion. TODO: nahradiť fontom Besteron (zmena len tu)
+const fontSans = DM_Sans({
   variable: "--font-sans-family",
   subsets: ["latin", "latin-ext"],
 });
