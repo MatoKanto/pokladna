@@ -6,8 +6,26 @@
   "Home": {
     "hero": {
       "title": "Pokladňa, ktorá robí biznis lepším",
-      "subtitle": "Placeholder text. Skutočný obsah doplníme pri skladaní homepage.",
+      "scrollHint": "Scrolluj",
+      "imageAlt": "Platobný terminál Besteron s úvodnou obrazovkou"
+    },
+    "intro": {
+      "titleStart": "Pokladňa hovorí.",
+      "titleAccent": "Vaša reč.",
+      "text": "Placeholder text. Obsah ďalších sekcií doplníme pri skladaní homepage.",
       "cta": "Vyskúšať"
     }
+  },
+  "Nav": {
+    "items": {
+      "products": "Produkty",
+      "about": "O nás",
+      "blog": "Blog"
+    },
+    "contact": "Kontaktovať",
+    "menu": "Menu",
+    "closeMenu": "Zavrieť menu",
+    "home": "Besteron, domov",
+    "primary": "Hlavná navigácia"
   }
 }

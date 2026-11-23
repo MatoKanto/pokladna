@@ -3,6 +3,7 @@ import { DM_Sans } from "next/font/google";
 import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { SiteHeader } from "@/components/layout/site-header";
 import { routing } from "@/i18n/routing";
 import "@/styles/globals.css";
 
@@ -35,7 +36,10 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} className={fontSans.variable}>
       <body>
-        <NextIntlClientProvider>{children}</NextIntlClientProvider>
+        <NextIntlClientProvider>
+          <SiteHeader />
+          {children}
+        </NextIntlClientProvider>
       </body>
     </html>
   );

@@ -6,8 +6,26 @@
   "Home": {
     "hero": {
       "title": "The POS that makes business better",
-      "subtitle": "Placeholder text. Real content comes when we assemble the homepage.",
+      "scrollHint": "Scroll",
+      "imageAlt": "Besteron payment terminal showing the home screen"
+    },
+    "intro": {
+      "titleStart": "The POS talks.",
+      "titleAccent": "Your language.",
+      "text": "Placeholder text. The content of the next sections comes when we assemble the homepage.",
       "cta": "Try it out"
     }
+  },
+  "Nav": {
+    "items": {
+      "products": "Products",
+      "about": "About",
+      "blog": "Blog"
+    },
+    "contact": "Contact us",
+    "menu": "Menu",
+    "closeMenu": "Close menu",
+    "home": "Besteron, home",
+    "primary": "Main navigation"
   }
 }
