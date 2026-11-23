@@ -1,0 +1,10 @@
+/*
+ * BRAND TOKENS: jediné miesto, kde žije identita Besteron.
+ * Tému (theme.css) môžeme kedykoľvek vymeniť, brand zostane.
+ * TODO: nahradiť hodnotami z booking.besteron.com
+ */
+:root {
+  --brand: oklch(0.55 0.2 260);
+  --brand-foreground: oklch(0.99 0 0);
+  --brand-radius: 1rem;
+}
