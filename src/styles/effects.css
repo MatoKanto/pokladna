@@ -23,3 +23,39 @@
     color-mix(in oklch, var(--glow) 0%, transparent) 100%
   );
 }
+
+/*
+ * Odlesk na displeji terminálu (tmavé sklo so svetelnými pásmi).
+ * .glass-base = tmavý základ s jemným brand tónom,
+ * .glass-streaks = svetelné pásy a brand žiara; vrstva sa posúva podľa scrollu.
+ */
+.glass-base {
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in oklch, var(--primary-foreground) 4%, transparent),
+      transparent 40%
+    ),
+    color-mix(in oklch, var(--primary) 9%, var(--foreground));
+}
+
+.glass-streaks {
+  background:
+    linear-gradient(
+      112deg,
+      transparent 18%,
+      color-mix(in oklch, var(--primary-foreground) 7%, transparent) 30%,
+      transparent 42%
+    ),
+    linear-gradient(
+      112deg,
+      transparent 52%,
+      color-mix(in oklch, var(--primary-foreground) 12%, transparent) 63%,
+      transparent 74%
+    ),
+    radial-gradient(
+      70% 40% at 20% 88%,
+      color-mix(in oklch, var(--primary) 40%, transparent),
+      transparent 70%
+    );
+}
