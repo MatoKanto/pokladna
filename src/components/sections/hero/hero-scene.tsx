@@ -2,45 +2,45 @@
 
 import Image from "next/image";
 import { useRef } from "react";
-import {
-  motion,
-  useReducedMotion,
-  useScroll,
-  useTransform,
-  type MotionValue,
-} from "motion/react";
+import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
 import { ChevronDown } from "lucide-react";
 
 type Props = {
   title: string;
   scrollHint: string;
   imageAlt: string;
-  captions: string[];
 };
 
 /**
  * Scroll-driven hero (inšpirácia: meetcleo.com).
- * Jedna sticky scéna; celú choreografiu riadi jediná hodnota `p` (scroll progress 0 až 1).
+ * Jedna sticky scéna; choreografiu riadi jediná hodnota `p` (scroll progress 0 až 1).
  *
- *  0.00–0.15  nadpis sa rozmaže a zmizne, terminál vyjde zdola (obrovský)
- *  0.15–0.50  terminál sa zmenšuje do stredu, pozadie prejde na brand farbu
- *  0.45–0.70  popisky sa objavujú postupne
- *  0.80–1.00  terminál odíde nahor, scénu prekryje ďalšia sekcia
+ *  0.00–0.14  nadpis sa rozmaže a zmizne
+ *  0.04–0.55  terminál vyjde zdola ako obrovský a zmenší sa do stredu
+ *  0.15–0.55  pozadie prejde na brandové, za terminálom sa rozsvieti mäkká žiara
+ *  0.55–1.00  terminál stojí v strede (pripnutý); ďalšia sekcia ho prekryje zdola
+ *
+ * Prekrytie zabezpečuje `Intro` so záporným horným okrajom 100svh, preto musí
+ * byť terminál usadený pred p ≈ 0.6 (pozri HERO_HEIGHT).
  */
+const HERO_HEIGHT = "h-[360svh]";
+
 export function HeroScene(props: Props) {
   const reduced = useReducedMotion();
   return reduced ? <HeroStatic {...props} /> : <HeroAnimated {...props} />;
 }
 
-function HeroAnimated({ title, scrollHint, imageAlt, captions }: Props) {
+function HeroAnimated({ title, scrollHint, imageAlt }: Props) {
   const ref = useRef<HTMLElement>(null);
   const { scrollYProgress: p } = useScroll({
     target: ref,
     offset: ["start start", "end end"],
   });
 
-  // Pozadie: tmavá scéna → brand
-  const brandOpacity = useTransform(p, [0.05, 0.4], [0, 1]);
+  // Pozadie: tmavá scéna → brandové, potom sa rozsvieti žiara
+  const stageOpacity = useTransform(p, [0.05, 0.4], [0, 1]);
+  const glowOpacity = useTransform(p, [0.15, 0.55], [0, 1]);
+  const glowScale = useTransform(p, [0.15, 0.55], [0.7, 1]);
 
   // Nadpis a hint
   const titleOpacity = useTransform(p, [0, 0.14], [1, 0]);
@@ -48,27 +48,23 @@ function HeroAnimated({ title, scrollHint, imageAlt, captions }: Props) {
   const titleScale = useTransform(p, [0, 0.14], [1, 0.94]);
   const hintOpacity = useTransform(p, [0, 0.05], [1, 0]);
 
-  // Terminál
-  const scale = useTransform(p, [0, 0.5, 0.8, 1], [2.6, 1, 0.92, 0.7]);
-  // Do 0.04 je terminál mimo obrazovky (čisté intro), potom vyjde zdola
-  const y = useTransform(
-    p,
-    [0, 0.04, 0.3, 0.5, 0.8, 1],
-    ["320%", "320%", "30%", "0%", "-6%", "-70%"],
-  );
-  const rotate = useTransform(p, [0, 0.5, 1], [7, 0, -4]);
+  // Terminál: do 0.04 mimo obrazovky (čisté intro), potom vyjde a usadí sa v strede
+  const scale = useTransform(p, [0, 0.55], [2.6, 1]);
+  const y = useTransform(p, [0, 0.04, 0.3, 0.55], ["320%", "320%", "30%", "0%"]);
+  const rotate = useTransform(p, [0, 0.55], [7, 0]);
 
   return (
-    <section ref={ref} className="relative h-[420svh]">
+    <section ref={ref} className={`relative ${HERO_HEIGHT}`}>
       <div className="sticky top-0 h-svh overflow-hidden bg-foreground">
         {/* pozadie */}
         <motion.div
-          style={{ opacity: brandOpacity }}
-          className="absolute inset-0 bg-primary"
+          style={{ opacity: stageOpacity }}
+          className="bg-stage absolute inset-0"
           aria-hidden
         />
-        <div
-          className="absolute inset-0 bg-radial-[at_50%_55%] from-primary-foreground/15 to-transparent"
+        <motion.div
+          style={{ opacity: glowOpacity, scale: glowScale }}
+          className="bg-soft-glow absolute inset-0"
           aria-hidden
         />
 
@@ -90,10 +86,10 @@ function HeroAnimated({ title, scrollHint, imageAlt, captions }: Props) {
         </motion.div>
 
         {/* terminál */}
-        <div className="absolute inset-0 grid place-items-center pb-[24svh] lg:pb-0">
+        <div className="absolute inset-0 grid place-items-center">
           <motion.div
             style={{ scale, y, rotate }}
-            className="relative aspect-[1128/1901] h-[56svh] will-change-transform lg:h-[74svh]"
+            className="relative aspect-[1128/1901] h-[68svh] will-change-transform lg:h-[74svh]"
           >
             <Image
               src="/images/terminal.webp"
@@ -105,63 +101,21 @@ function HeroAnimated({ title, scrollHint, imageAlt, captions }: Props) {
             />
           </motion.div>
         </div>
-
-        {/* popisky: na mobile stĺpec dole, na desktope po bokoch terminálu */}
-        <div className="absolute inset-x-4 bottom-6 z-10 flex flex-col gap-2 lg:contents">
-          {captions.map((text, i) => (
-            <Caption
-              key={text}
-              p={p}
-              text={text}
-              from={0.45 + i * 0.1}
-              className={CAPTION_POSITIONS[i]}
-            />
-          ))}
-        </div>
       </div>
     </section>
   );
 }
 
-// Na desktope okolo terminálu (stred ± pevný odstup), na menších šírkach stĺpec dole
-const CAPTION_POSITIONS = [
-  "lg:left-[calc(50%-27rem)] lg:top-[26%]",
-  "lg:left-[calc(50%+12rem)] lg:top-[44%]",
-  "lg:left-[calc(50%-25rem)] lg:top-[64%]",
-];
-
-function Caption({
-  p,
-  text,
-  from,
-  className,
-}: {
-  p: MotionValue<number>;
-  text: string;
-  from: number;
-  className: string;
-}) {
-  const opacity = useTransform(p, [from, from + 0.06, 0.8, 0.88], [0, 1, 1, 0]);
-  const y = useTransform(p, [from, from + 0.06], [24, 0]);
-  return (
-    <motion.p
-      style={{ opacity, y }}
-      className={`rounded-xl bg-card px-4 py-3 text-sm font-medium text-card-foreground shadow-lg lg:absolute lg:w-60 lg:text-base ${className}`}
-    >
-      {text}
-    </motion.p>
-  );
-}
-
 /** Varianta pre prefers-reduced-motion: žiadny pohyb, hotový stav. */
-function HeroStatic({ title, imageAlt, captions }: Props) {
+function HeroStatic({ title, imageAlt }: Props) {
   return (
-    <section className="bg-primary px-6 py-20 text-primary-foreground">
+    <section className="bg-stage relative isolate overflow-hidden px-6 py-24 text-primary-foreground">
+      <div className="bg-soft-glow absolute inset-0 -z-10" aria-hidden />
       <div className="mx-auto flex max-w-3xl flex-col items-center gap-10 text-center">
         <h1 className="text-4xl font-medium tracking-tight md:text-6xl">
           {title}
         </h1>
-        <div className="relative aspect-[1128/1901] h-[60svh]">
+        <div className="relative aspect-[1128/1901] h-[70svh]">
           <Image
             src="/images/terminal.webp"
             alt={imageAlt}
@@ -171,13 +125,6 @@ function HeroStatic({ title, imageAlt, captions }: Props) {
             className="object-contain"
           />
         </div>
-        <ul className="flex flex-col gap-2">
-          {captions.map((c) => (
-            <li key={c} className="rounded-xl bg-card px-4 py-3 text-card-foreground">
-              {c}
-            </li>
-          ))}
-        </ul>
       </div>
     </section>
   );

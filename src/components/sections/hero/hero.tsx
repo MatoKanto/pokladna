@@ -10,7 +10,6 @@ export async function Hero() {
       title={t("title")}
       scrollHint={t("scrollHint")}
       imageAlt={t("imageAlt")}
-      captions={[t("captions.0"), t("captions.1"), t("captions.2")]}
     />
   );
 }

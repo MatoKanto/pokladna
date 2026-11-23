@@ -1,0 +1,25 @@
+/*
+ * Vizuálne efekty postavené len na tokenoch (žiadne natvrdo farby).
+ */
+
+/* Tmavé brandové pozadie scény: brand zmiešaný s tmavou základnou farbou. */
+.bg-stage {
+  background-color: color-mix(in oklch, var(--primary) 42%, var(--foreground));
+}
+
+/*
+ * Soft radial glow: široká, mäkko rozptýlená žiara so stredom za terminálom.
+ * Viac medzistupňov = plynulý pokles bez ostrého okraja, bez bieleho stredu.
+ * Šírka žiary ~ polovica šírky sekcie (polomer 28vw).
+ */
+.bg-soft-glow {
+  --glow: color-mix(in oklch, var(--primary) 90%, var(--primary-foreground));
+  background: radial-gradient(
+    ellipse 28vw 52svh at 50% 52%,
+    color-mix(in oklch, var(--glow) 85%, transparent) 0%,
+    color-mix(in oklch, var(--glow) 62%, transparent) 22%,
+    color-mix(in oklch, var(--glow) 34%, transparent) 45%,
+    color-mix(in oklch, var(--glow) 13%, transparent) 70%,
+    color-mix(in oklch, var(--glow) 0%, transparent) 100%
+  );
+}

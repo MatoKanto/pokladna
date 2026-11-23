@@ -7,12 +7,7 @@
     "hero": {
       "title": "Pokladňa, ktorá robí biznis lepším",
       "scrollHint": "Scrolluj",
-      "imageAlt": "Platobný terminál Besteron s úvodnou obrazovkou",
-      "captions": [
-        "Predaj za pár sekúnd",
-        "Karta, QR aj hotovosť na jednom mieste",
-        "Prehľady a účtenky v reálnom čase"
-      ]
+      "imageAlt": "Platobný terminál Besteron s úvodnou obrazovkou"
     },
     "intro": {
       "titleStart": "Pokladňa hovorí.",
