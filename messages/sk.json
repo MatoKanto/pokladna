@@ -20,5 +20,17 @@
       "text": "Placeholder text. Obsah ďalších sekcií doplníme pri skladaní homepage.",
       "cta": "Vyskúšať"
     }
+  },
+  "Nav": {
+    "items": {
+      "products": "Produkty",
+      "about": "O nás",
+      "blog": "Blog"
+    },
+    "contact": "Kontaktovať",
+    "menu": "Menu",
+    "closeMenu": "Zavrieť menu",
+    "home": "Besteron, domov",
+    "primary": "Hlavná navigácia"
   }
 }

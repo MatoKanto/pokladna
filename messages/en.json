@@ -20,5 +20,17 @@
       "text": "Placeholder text. The content of the next sections comes when we assemble the homepage.",
       "cta": "Try it out"
     }
+  },
+  "Nav": {
+    "items": {
+      "products": "Products",
+      "about": "About",
+      "blog": "Blog"
+    },
+    "contact": "Contact us",
+    "menu": "Menu",
+    "closeMenu": "Close menu",
+    "home": "Besteron, home",
+    "primary": "Main navigation"
   }
 }
