@@ -9,7 +9,7 @@ export async function Intro() {
   const t = await getTranslations("Home.intro");
 
   return (
-    <section className="relative z-10 -mt-[100svh] flex min-h-svh items-start justify-center rounded-t-[2.5rem] bg-background px-6 py-32 text-center">
+    <section data-header-theme="light" className="relative z-10 -mt-[100svh] flex min-h-svh items-start justify-center rounded-t-[2.5rem] bg-background px-6 py-32 text-center">
       <div className="mx-auto flex max-w-2xl flex-col items-center gap-6">
         <h2 className="text-4xl font-medium tracking-tight md:text-5xl">
           {t("titleStart")} <span className="text-primary">{t("titleAccent")}</span>

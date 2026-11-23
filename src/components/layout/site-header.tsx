@@ -2,8 +2,9 @@ import { getTranslations } from "next-intl/server";
 import { BesteronLogo } from "@/components/brand/logo";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
-import { glass } from "./glass";
+import { glass, glassCta, glassHover, glassItem } from "./glass";
 import { MobileMenu } from "./mobile-menu";
+import { ToneHeader } from "./tone-header";
 
 // Hrefy sú zatiaľ kotvy na homepage; nahradíme reálnymi stránkami.
 const NAV_ITEMS = [
@@ -22,7 +23,7 @@ export async function SiteHeader() {
   }));
 
   return (
-    <header className="pointer-events-none fixed inset-x-0 top-3 z-50 px-3 lg:top-4 lg:px-8">
+    <ToneHeader className="group/header pointer-events-none fixed inset-x-0 top-3 z-50 px-3 lg:top-4 lg:px-8">
       <div className="relative flex items-center justify-between">
         {/* logo */}
         <Link
@@ -30,7 +31,8 @@ export async function SiteHeader() {
           aria-label={t("home")}
           className={cn(
             glass,
-            "pointer-events-auto flex h-11 items-center rounded-full px-5 transition-colors hover:bg-background lg:h-14 lg:px-6",
+            glassHover,
+            "pointer-events-auto flex h-11 items-center rounded-full px-5 lg:h-14 lg:px-6",
           )}
         >
           <BesteronLogo className="h-5 w-auto lg:h-6" />
@@ -48,7 +50,10 @@ export async function SiteHeader() {
             <Link
               key={item.href}
               href={item.href}
-              className="rounded-full px-5 py-2.5 text-sm font-medium transition-colors hover:bg-foreground/10"
+              className={cn(
+                glassItem,
+                "rounded-full px-5 py-2.5 text-sm font-medium transition-colors",
+              )}
             >
               {item.label}
             </Link>
@@ -61,7 +66,8 @@ export async function SiteHeader() {
             href={CONTACT_HREF}
             className={cn(
               glass,
-              "flex h-11 items-center rounded-full px-5 text-sm font-medium transition-colors hover:bg-foreground hover:text-background lg:h-14 lg:px-7",
+              glassCta,
+              "flex h-11 items-center rounded-full px-5 text-sm font-medium lg:h-14 lg:px-7",
             )}
           >
             {t("contact")}
@@ -72,6 +78,6 @@ export async function SiteHeader() {
           />
         </div>
       </div>
-    </header>
+    </ToneHeader>
   );
 }

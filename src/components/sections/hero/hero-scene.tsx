@@ -54,7 +54,11 @@ function HeroAnimated({ title, scrollHint, imageAlt }: Props) {
   const rotate = useTransform(p, [0, 0.55], [7, 0]);
 
   return (
-    <section ref={ref} className={`relative ${HERO_HEIGHT}`}>
+    <section
+      ref={ref}
+      data-header-theme="dark"
+      className={`relative ${HERO_HEIGHT}`}
+    >
       <div className="sticky top-0 h-svh overflow-hidden bg-foreground">
         {/* pozadie */}
         <motion.div
@@ -109,7 +113,7 @@ function HeroAnimated({ title, scrollHint, imageAlt }: Props) {
 /** Varianta pre prefers-reduced-motion: žiadny pohyb, hotový stav. */
 function HeroStatic({ title, imageAlt }: Props) {
   return (
-    <section className="bg-stage relative isolate overflow-hidden px-6 py-24 text-primary-foreground">
+    <section data-header-theme="dark" className="bg-stage relative isolate overflow-hidden px-6 py-24 text-primary-foreground">
       <div className="bg-soft-glow absolute inset-0 -z-10" aria-hidden />
       <div className="mx-auto flex max-w-3xl flex-col items-center gap-10 text-center">
         <h1 className="text-4xl font-medium tracking-tight md:text-6xl">
