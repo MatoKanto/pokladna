@@ -42,16 +42,23 @@ type Props = {
  * a z nich počítame homografiu → CSS matrix3d. Celú choreografiu riadi scroll
  * progress `p` (0 až 1) cez `deviceMatrix`.
  *
- *  0.00–0.14  nadpis sa rozmaže a zmizne
- *  0.00–0.50  odďaľovanie (zoom out)
- *  0.05–0.50  natočenie z 2D do 3D
- *  0.28–0.50  odlesk sa rozplynie do UI
- *  0.50–1.00  terminál stojí v strede (pripnutý); ďalšia sekcia ho prekryje zdola
+ *  0.00–0.12  nadpis sa rozmaže a zmizne
+ *  0.00–0.55  odďaľovanie (zoom out)
+ *  0.00–0.72  plynulé, pomalé natáčanie z 2D do 3D (celým scrollom)
+ *  0.30–0.55  odlesk sa rozplynie do UI
+ *  0.55–0.72  terminál je v strede (pripnutý) a dokončí natočenie
+ *  od 0.74    ďalšia sekcia ho prekryje zdola
  *
- * Prekrytie zabezpečuje `Intro` so záporným horným okrajom 100svh, preto musí
- * byť všetko usadené pred p ≈ 0.6 (pozri HERO_HEIGHT).
+ * Prekrytie zabezpečuje `Intro` so záporným horným okrajom 100svh. Začína sa pri
+ * p = (H - 200svh) / (H - 100svh); pre H = 480svh je to ≈ 0.74, preto sa natáčanie
+ * musí dokončiť skôr (pozri ROTATE_END).
  */
-const HERO_HEIGHT = "h-[360svh]";
+const HERO_HEIGHT = "h-[480svh]";
+const ZOOM_END = 0.55;
+const ROTATE_END = 0.72;
+// Natočenie: 0 = plochý, 1 = uhol v PNG, > 1 = ďalšie natočenie za ním (extrapolácia),
+// aby sa terminál otáčal viditeľne až do konca scény.
+const ROTATE_TO = 1.4;
 
 // Rozmery zdrojového obrázka (public/images/terminal.webp)
 const IMG_W = 1128;
@@ -104,10 +111,12 @@ function deviceMatrix(p: number, vw: number, vh: number): string {
   // Počiatočný zoom: plochý displej pokrýva celé okno
   const zoom0 = Math.max(vw / (FLAT_W * k), vh / (FLAT_H * k)) * 1.03;
 
-  const zp = clamp01(p / 0.5);
+  const zp = clamp01(p / ZOOM_END);
   const ez = easeInOutSine(zp);
   const zoom = Math.exp(lerp(Math.log(zoom0), 0, ez));
-  const t = smoothstep(clamp01((p - 0.05) / 0.45)); // 0 = plochý, 1 = perspektíva
+  // Natáčanie: takmer lineárne počas celého scrollu (30 % zjemnenia na koncoch)
+  const x = clamp01(p / ROTATE_END);
+  const t = ROTATE_TO * lerp(x, smoothstep(x), 0.3);
 
   const dst = QUAD.map((q, i) => [
     lerp(FLAT[i][0], q[0], t),
@@ -155,23 +164,23 @@ function HeroAnimated({ title, scrollHint, imageAlt }: Props) {
   const deviceOpacity = useTransform(vw, (w) => (w ? 1 : 0));
 
   // Pozadie scény: tmavé → brandové, potom sa rozsvieti žiara
-  const stageOpacity = useTransform(p, [0.08, 0.4], [0, 1]);
-  const glowOpacity = useTransform(p, [0.3, 0.55], [0, 1]);
-  const glowScale = useTransform(p, [0.3, 0.55], [0.7, 1]);
+  const stageOpacity = useTransform(p, [0.08, 0.45], [0, 1]);
+  const glowOpacity = useTransform(p, [0.35, 0.6], [0, 1]);
+  const glowScale = useTransform(p, [0.35, 0.6], [0.7, 1]);
 
   // Nadpis a hint
-  const titleOpacity = useTransform(p, [0, 0.14], [1, 0]);
-  const titleBlur = useTransform(p, [0, 0.14], ["blur(0px)", "blur(14px)"]);
-  const titleScale = useTransform(p, [0, 0.14], [1, 0.94]);
-  const hintOpacity = useTransform(p, [0, 0.05], [1, 0]);
+  const titleOpacity = useTransform(p, [0, 0.12], [1, 0]);
+  const titleBlur = useTransform(p, [0, 0.12], ["blur(0px)", "blur(14px)"]);
+  const titleScale = useTransform(p, [0, 0.12], [1, 0.94]);
+  const hintOpacity = useTransform(p, [0, 0.04], [1, 0]);
 
   // Zostava terminálu
   const device = useTransform([p, vw, vh], ([pv, w, h]: number[]) =>
     deviceMatrix(pv, w, h),
   );
   // Odlesk: drží sa do 0.28, potom sa rozplynie do UI; pásy sa pri natáčaní posúvajú
-  const reflectionOpacity = useTransform(p, [0.28, 0.5], [1, 0]);
-  const streakX = useTransform(p, [0, 0.5], ["10%", "-14%"]);
+  const reflectionOpacity = useTransform(p, [0.3, 0.55], [1, 0]);
+  const streakX = useTransform(p, [0, 0.55], ["10%", "-14%"]);
 
   return (
     <section
