@@ -7,7 +7,6 @@ import {
   motion,
   useMotionTemplate,
   useMotionValue,
-  useMotionValueEvent,
   useReducedMotion,
   useScroll,
   useSpring,
@@ -48,10 +47,10 @@ type Props = {
  * progress `p` (0 až 1) cez `deviceMatrix`.
  *
  *  0.00–0.12  nadpis sa rozmaže a zmizne
- *  0.00–0.42  odďaľovanie (zoom out); displej sa z plochého (2D) narovná do uhla z PNG
- *  0.20–0.42  odlesk sa rozplynie do UI
- *  0.25–0.42  okolie prejde z brand červenej do bielej
- *  0.30–0.76  terminál (už usadený v strede, pripnutý) sa ďalej plynulo otáča (3D yaw)
+ *  0.00–0.42  odďaľovanie (zoom out), displej je plochý (2D)
+ *  0.20–0.42  odlesk na displeji sa rozplynie do UI
+ *  0.18–0.76  plynulé natáčanie z plochého displeja do uhla z PNG (finálny stav);
+ *             väčšina je vidieť, keď je terminál už usadený v strede (pripnutý)
  *  od 0.78    ďalšia sekcia ho prekryje zdola
  *
  * Prekrytie zabezpečuje `Intro` so záporným horným okrajom 100svh. Začína sa pri
@@ -60,13 +59,15 @@ type Props = {
  */
 const HERO_HEIGHT = "h-[560svh]";
 const ZOOM_END = 0.42;
-// Natáčanie v 2 krokoch:
-//  1) počas zoomu sa displej "narovná" → uhol z PNG (homografia, 2D → 3D),
-//  2) po usadení sa terminál ďalej otáča rovnakým smerom okolo zvislej osi
-//     (skutočná 3D rotácia s perspektívou), aby bolo natáčanie dobre vidieť.
-const YAW_START = 0.3;
-const YAW_END = 0.76;
-const YAW_DEG = -34; // záporné = otáča sa rovnakým smerom ako uhol v PNG
+// Natáčanie: z plochého displeja (2D) do uhla v PNG (finálny stav = PNG presne).
+// Beží plynulo od ROTATE_START do ROTATE_END, väčšinou už keď je terminál usadený.
+//  - `t` (homografia): displej sa z plochého obdĺžnika mení na skutočnú perspektívu,
+//  - `yaw` (3D): navyše sa terminál otáča okolo zvislej osi z YAW_START_DEG späť na 0.
+//    Je to rovnaký smer otáčania (doľava), takže pohyb je monotónny a viditeľnejší.
+// Na konci je t = 1, yaw = 0 a žiadny odlesk, teda presne obrázok z PNG.
+const ROTATE_START = 0.18;
+const ROTATE_END = 0.76;
+const YAW_START_DEG = 55;
 const PERSPECTIVE = 1200; // px
 
 // Rozmery zdrojového obrázka (public/images/terminal.webp)
@@ -109,6 +110,7 @@ const OVERLAY_M = 10;
 const REFLECTION_TRANSFORM = toMatrix3d(
   mul(homography(FLAT_RECT, QUAD), translate(-OVERLAY_M, -OVERLAY_M)),
 );
+const SCREEN_TRANSFORM = toMatrix3d(homography(FLAT_RECT, QUAD));
 
 /** CSS transformácia celej zostavy (obrázok + odlesk) pre daný scroll progress. */
 function deviceMatrix(p: number, vw: number, vh: number): string {
@@ -118,12 +120,14 @@ function deviceMatrix(p: number, vw: number, vh: number): string {
   const k = ((vw >= 1024 ? 0.74 : 0.68) * vh) / IMG_H;
 
   // Počiatočný zoom: plochý displej pokrýva celé okno
-  const zoom0 = Math.max(vw / (FLAT_W * k), vh / (FLAT_H * k)) * 1.03;
+  const zoom0 = Math.max(vw / (FLAT_W * k), vh / (FLAT_H * k)) * 1.25;
 
   const zp = clamp01(p / ZOOM_END);
   const ez = easeInOutSine(zp);
   const zoom = Math.exp(lerp(Math.log(zoom0), 0, ez));
-  const t = ez; // 0 = plochý displej, 1 = uhol v PNG
+  // Postup natáčania 0 až 1 (zjemnený na začiatku a konci)
+  const u = smoothstep(clamp01((p - ROTATE_START) / (ROTATE_END - ROTATE_START)));
+  const t = u; // 0 = plochý displej, 1 = uhol v PNG
 
   const dst = QUAD.map((q, i) => [
     lerp(FLAT[i][0], q[0], t),
@@ -139,7 +143,7 @@ function deviceMatrix(p: number, vw: number, vh: number): string {
     translate(vw / 2, vh / 2),
     mul(scale(k * zoom), mul(translate(-fx, -fy), H)),
   );
-  const yaw = YAW_DEG * smoothstep(clamp01((p - YAW_START) / (YAW_END - YAW_START)));
+  const yaw = YAW_START_DEG * (1 - u);
   if (!yaw) return toMatrix3d(M);
   // Rotácia okolo zvislej osi cez stred okna (tam je pri usadení terminál)
   const cx = vw / 2;
@@ -207,17 +211,13 @@ function HeroAnimated({ title, titleAccent, scrollHint, imageAlt }: Props) {
   const spotY = useTransform(sy, (v) => v * 100);
   const spotlight = useMotionTemplate`radial-gradient(45vmax circle at ${spotX}% ${spotY}%, color-mix(in oklch, var(--primary-foreground) 15%, transparent), transparent 62%)`;
   const introGlassOpacity = useTransform(p, [0, 0.12], [1, 0]);
+  // Plné sklo cez celé okno: zaručí čistý prvý záber, hneď po začiatku scrollu sa rozplynie
+  const fullGlassOpacity = useTransform(p, [0, 0.1], [1, 0]);
 
   // Zostava je skrytá, kým nepoznáme veľkosť okna (žiadny záblesk neumiestneného obrázka)
   const deviceOpacity = useTransform(vw, (w) => (w ? 1 : 0));
 
-  // Hlavička: keď okolie zbelie, prepne sa na svetlý tón (pozri ToneHeader)
-  useMotionValueEvent(p, "change", (v) => {
-    if (ref.current) ref.current.dataset.headerTheme = v > 0.36 ? "light" : "dark";
-  });
-
-  // Pozadie scény: brand červená → biela, potom sa rozsvieti žiara
-  const stageOpacity = useTransform(p, [0.25, 0.42], [0, 1]);
+  // Pozadie scény: stále brand červená; biela žiara sa rozsvieti po usadení
   const glowOpacity = useTransform(p, [0.34, 0.52], [0, 1]);
   const glowScale = useTransform(p, [0.34, 0.52], [0.7, 1]);
 
@@ -233,6 +233,14 @@ function HeroAnimated({ title, titleAccent, scrollHint, imageAlt }: Props) {
   );
   // Odlesk: drží sa do 0.28, potom sa rozplynie do UI; pásy sa pri natáčaní posúvajú
   const reflectionOpacity = useTransform(p, [0.2, 0.42], [1, 0]);
+  // Odlesk svetla na displeji počas natáčania: objaví sa, prejde cez displej, na konci zmizne
+  const sheenX = useTransform(p, [ROTATE_START, ROTATE_END], ["-42%", "42%"]);
+  const sheenOpacity = useTransform(
+    p,
+    [ROTATE_START, 0.4, 0.62, ROTATE_END],
+    [0, 1, 1, 0],
+  );
+
   // pásy odlesku: posun podľa scrollu + jemný paralax podľa kurzora
   const streakX = useTransform([p, sx], ([pv, m]: number[]) => {
     const scroll = lerp(10, -14, clamp01(pv / ZOOM_END));
@@ -247,11 +255,6 @@ function HeroAnimated({ title, titleAccent, scrollHint, imageAlt }: Props) {
     >
       <div className="sticky top-0 h-svh overflow-hidden bg-primary">
         {/* pozadie */}
-        <motion.div
-          style={{ opacity: stageOpacity }}
-          className="bg-stage absolute inset-0"
-          aria-hidden
-        />
         <motion.div
           style={{ opacity: glowOpacity, scale: glowScale }}
           className="bg-soft-glow absolute inset-0"
@@ -294,6 +297,34 @@ function HeroAnimated({ title, titleAccent, scrollHint, imageAlt }: Props) {
               className="glass-streaks absolute -inset-x-1/3 inset-y-0"
             />
           </motion.div>
+          {/* odlesk svetla, ktorý sa posúva po displeji počas natáčania */}
+          <motion.div
+            aria-hidden
+            style={{
+              width: FLAT_W,
+              height: FLAT_H,
+              transform: SCREEN_TRANSFORM,
+              opacity: sheenOpacity,
+            }}
+            className="absolute left-0 top-0 origin-top-left overflow-hidden rounded-[20px]"
+          >
+            <motion.div
+              style={{ x: sheenX }}
+              className="glass-sheen absolute -inset-x-full inset-y-0"
+            />
+          </motion.div>
+        </motion.div>
+
+        {/* plné sklo displeja cez celé okno (čistý štart) */}
+        <motion.div
+          aria-hidden
+          style={{ opacity: fullGlassOpacity }}
+          className="glass-base pointer-events-none absolute inset-0 overflow-hidden"
+        >
+          <motion.div
+            style={{ x: streakX }}
+            className="glass-streaks absolute -inset-x-1/3 inset-y-0"
+          />
         </motion.div>
 
         {/* úvodné sklo: reflektor pod kurzorom a občasný prejazd svetla */}
@@ -338,8 +369,8 @@ function HeroAnimated({ title, titleAccent, scrollHint, imageAlt }: Props) {
 function HeroStatic({ title, titleAccent, imageAlt }: Props) {
   return (
     <section
-      data-header-theme="light"
-      className="bg-stage relative isolate overflow-hidden px-6 py-24 text-foreground"
+      data-header-theme="dark"
+      className="relative isolate overflow-hidden bg-primary px-6 py-24 text-primary-foreground"
     >
       <div className="bg-soft-glow absolute inset-0 -z-10" aria-hidden />
       <div className="mx-auto flex max-w-3xl flex-col items-center gap-10 text-center">

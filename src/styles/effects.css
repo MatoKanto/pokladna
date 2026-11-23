@@ -2,24 +2,19 @@
  * Vizuálne efekty postavené len na tokenoch (žiadne natvrdo farby).
  */
 
-/* Pozadie scény po prechode: biele (token background). */
-.bg-stage {
-  background-color: var(--background);
-}
-
 /*
  * Soft radial glow: široká, mäkko rozptýlená žiara so stredom za terminálom.
- * Brand tón (token primary) s nízkou nepriehľadnosťou; viac medzistupňov = plynulý pokles bez ostrého okraja.
+ * Biela (token primary-foreground) s nízkou nepriehľadnosťou; viac medzistupňov = plynulý pokles bez ostrého okraja.
  * Šírka žiary ~ polovica šírky sekcie (polomer 28vw).
  */
 .bg-soft-glow {
-  --glow: var(--primary);
+  --glow: var(--primary-foreground);
   background: radial-gradient(
     ellipse 28vw 52svh at 50% 52%,
-    color-mix(in oklch, var(--glow) 30%, transparent) 0%,
-    color-mix(in oklch, var(--glow) 22%, transparent) 22%,
-    color-mix(in oklch, var(--glow) 12%, transparent) 45%,
-    color-mix(in oklch, var(--glow) 4%, transparent) 70%,
+    color-mix(in oklch, var(--glow) 55%, transparent) 0%,
+    color-mix(in oklch, var(--glow) 40%, transparent) 22%,
+    color-mix(in oklch, var(--glow) 22%, transparent) 45%,
+    color-mix(in oklch, var(--glow) 8%, transparent) 70%,
     color-mix(in oklch, var(--glow) 0%, transparent) 100%
   );
 }
@@ -58,6 +53,19 @@
       color-mix(in oklch, var(--primary-foreground) 16%, transparent),
       transparent 70%
     );
+}
+
+/*
+ * Odlesk svetla, ktorý sa pri natáčaní terminálu posúva po displeji
+ * (širší prvok, posúva sa v hero-scene podľa scrollu).
+ */
+.glass-sheen {
+  background: linear-gradient(
+    100deg,
+    transparent 41%,
+    color-mix(in oklch, var(--primary-foreground) 20%, transparent) 50%,
+    transparent 59%
+  );
 }
 
 /* ---------- Úvodná obrazovka: animácie ---------- */
