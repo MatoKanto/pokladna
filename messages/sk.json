@@ -6,7 +6,18 @@
   "Home": {
     "hero": {
       "title": "Pokladňa, ktorá robí biznis lepším",
-      "subtitle": "Placeholder text. Skutočný obsah doplníme pri skladaní homepage.",
+      "scrollHint": "Scrolluj",
+      "imageAlt": "Platobný terminál Besteron s úvodnou obrazovkou",
+      "captions": [
+        "Predaj za pár sekúnd",
+        "Karta, QR aj hotovosť na jednom mieste",
+        "Prehľady a účtenky v reálnom čase"
+      ]
+    },
+    "intro": {
+      "titleStart": "Pokladňa hovorí.",
+      "titleAccent": "Vaša reč.",
+      "text": "Placeholder text. Obsah ďalších sekcií doplníme pri skladaní homepage.",
       "cta": "Vyskúšať"
     }
   }

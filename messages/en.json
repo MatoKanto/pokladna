@@ -6,7 +6,18 @@
   "Home": {
     "hero": {
       "title": "The POS that makes business better",
-      "subtitle": "Placeholder text. Real content comes when we assemble the homepage.",
+      "scrollHint": "Scroll",
+      "imageAlt": "Besteron payment terminal showing the home screen",
+      "captions": [
+        "Sell in a few seconds",
+        "Card, QR and cash in one place",
+        "Reports and receipts in real time"
+      ]
+    },
+    "intro": {
+      "titleStart": "The POS talks.",
+      "titleAccent": "Your language.",
+      "text": "Placeholder text. The content of the next sections comes when we assemble the homepage.",
       "cta": "Try it out"
     }
   }
