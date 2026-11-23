@@ -11,8 +11,8 @@ export async function Intro() {
   return (
     <section data-header-theme="light" className="relative z-10 -mt-[100svh] flex min-h-svh items-start justify-center rounded-t-[2.5rem] bg-background px-6 py-32 text-center">
       <div className="mx-auto flex max-w-2xl flex-col items-center gap-6">
-        <h2 className="text-4xl font-medium tracking-tight md:text-5xl">
-          {t("titleStart")} <span className="text-primary">{t("titleAccent")}</span>
+        <h2 className="text-4xl font-extrabold tracking-tight md:text-5xl">
+          {t("titleStart")} <span className="font-normal text-primary">{t("titleAccent")}</span>
         </h2>
         <p className="text-muted-foreground">{t("text")}</p>
         <Button size="lg">{t("cta")}</Button>

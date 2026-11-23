@@ -77,7 +77,7 @@ function HeroAnimated({ title, scrollHint, imageAlt }: Props) {
           style={{ opacity: titleOpacity, filter: titleBlur, scale: titleScale }}
           className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-16 px-6 text-center md:gap-24"
         >
-          <h1 className="max-w-3xl text-4xl font-medium tracking-tight text-background md:text-6xl">
+          <h1 className="max-w-3xl text-4xl font-extrabold tracking-tight text-background md:text-6xl">
             {title}
           </h1>
           <motion.p
@@ -116,7 +116,7 @@ function HeroStatic({ title, imageAlt }: Props) {
     <section data-header-theme="dark" className="bg-stage relative isolate overflow-hidden px-6 py-24 text-primary-foreground">
       <div className="bg-soft-glow absolute inset-0 -z-10" aria-hidden />
       <div className="mx-auto flex max-w-3xl flex-col items-center gap-10 text-center">
-        <h1 className="text-4xl font-medium tracking-tight md:text-6xl">
+        <h1 className="text-4xl font-extrabold tracking-tight md:text-6xl">
           {title}
         </h1>
         <div className="relative aspect-[1128/1901] h-[70svh]">
