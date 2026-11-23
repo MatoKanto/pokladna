@@ -36,7 +36,7 @@
       color-mix(in oklch, var(--primary-foreground) 4%, transparent),
       transparent 40%
     ),
-    color-mix(in oklch, var(--primary) 9%, var(--foreground));
+    var(--navy);
 }
 
 .glass-streaks {

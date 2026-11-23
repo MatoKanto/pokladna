@@ -204,9 +204,9 @@ function HeroAnimated({ title, titleAccent, scrollHint, imageAlt }: Props) {
   const deviceOpacity = useTransform(vw, (w) => (w ? 1 : 0));
 
   // Pozadie scény: tmavé → brandové, potom sa rozsvieti žiara
-  const stageOpacity = useTransform(p, [0.08, 0.45], [0, 1]);
-  const glowOpacity = useTransform(p, [0.35, 0.6], [0, 1]);
-  const glowScale = useTransform(p, [0.35, 0.6], [0.7, 1]);
+  const stageOpacity = useTransform(p, [0.3, 0.46], [0, 1]);
+  const glowOpacity = useTransform(p, [0.42, 0.62], [0, 1]);
+  const glowScale = useTransform(p, [0.42, 0.62], [0.7, 1]);
 
   // Nadpis a hint
   const titleOpacity = useTransform(p, [0, 0.12], [1, 0]);
@@ -232,7 +232,7 @@ function HeroAnimated({ title, titleAccent, scrollHint, imageAlt }: Props) {
       data-header-theme="dark"
       className={`relative ${HERO_HEIGHT}`}
     >
-      <div className="sticky top-0 h-svh overflow-hidden bg-foreground">
+      <div className="sticky top-0 h-svh overflow-hidden bg-navy">
         {/* pozadie */}
         <motion.div
           style={{ opacity: stageOpacity }}
