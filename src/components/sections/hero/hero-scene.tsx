@@ -7,6 +7,7 @@ import {
   motion,
   useMotionTemplate,
   useMotionValue,
+  useMotionValueEvent,
   useReducedMotion,
   useScroll,
   useSpring,
@@ -47,22 +48,26 @@ type Props = {
  * progress `p` (0 až 1) cez `deviceMatrix`.
  *
  *  0.00–0.12  nadpis sa rozmaže a zmizne
- *  0.00–0.55  odďaľovanie (zoom out)
- *  0.00–0.72  plynulé, pomalé natáčanie z 2D do 3D (celým scrollom)
- *  0.30–0.55  odlesk sa rozplynie do UI
- *  0.55–0.72  terminál je v strede (pripnutý) a dokončí natočenie
- *  od 0.74    ďalšia sekcia ho prekryje zdola
+ *  0.00–0.42  odďaľovanie (zoom out); displej sa z plochého (2D) narovná do uhla z PNG
+ *  0.20–0.42  odlesk sa rozplynie do UI
+ *  0.25–0.42  okolie prejde z brand červenej do bielej
+ *  0.30–0.76  terminál (už usadený v strede, pripnutý) sa ďalej plynulo otáča (3D yaw)
+ *  od 0.78    ďalšia sekcia ho prekryje zdola
  *
  * Prekrytie zabezpečuje `Intro` so záporným horným okrajom 100svh. Začína sa pri
- * p = (H - 200svh) / (H - 100svh); pre H = 480svh je to ≈ 0.74, preto sa natáčanie
+ * p = (H - 200svh) / (H - 100svh); pre H = 560svh je to ≈ 0.78, preto sa natáčanie
  * musí dokončiť skôr (pozri ROTATE_END).
  */
-const HERO_HEIGHT = "h-[480svh]";
-const ZOOM_END = 0.55;
-const ROTATE_END = 0.72;
-// Natočenie: 0 = plochý, 1 = uhol v PNG, > 1 = ďalšie natočenie za ním (extrapolácia),
-// aby sa terminál otáčal viditeľne až do konca scény.
-const ROTATE_TO = 1.4;
+const HERO_HEIGHT = "h-[560svh]";
+const ZOOM_END = 0.42;
+// Natáčanie v 2 krokoch:
+//  1) počas zoomu sa displej "narovná" → uhol z PNG (homografia, 2D → 3D),
+//  2) po usadení sa terminál ďalej otáča rovnakým smerom okolo zvislej osi
+//     (skutočná 3D rotácia s perspektívou), aby bolo natáčanie dobre vidieť.
+const YAW_START = 0.3;
+const YAW_END = 0.76;
+const YAW_DEG = -34; // záporné = otáča sa rovnakým smerom ako uhol v PNG
+const PERSPECTIVE = 1200; // px
 
 // Rozmery zdrojového obrázka (public/images/terminal.webp)
 const IMG_W = 1128;
@@ -118,9 +123,7 @@ function deviceMatrix(p: number, vw: number, vh: number): string {
   const zp = clamp01(p / ZOOM_END);
   const ez = easeInOutSine(zp);
   const zoom = Math.exp(lerp(Math.log(zoom0), 0, ez));
-  // Natáčanie: takmer lineárne počas celého scrollu (30 % zjemnenia na koncoch)
-  const x = clamp01(p / ROTATE_END);
-  const t = ROTATE_TO * lerp(x, smoothstep(x), 0.3);
+  const t = ez; // 0 = plochý displej, 1 = uhol v PNG
 
   const dst = QUAD.map((q, i) => [
     lerp(FLAT[i][0], q[0], t),
@@ -136,7 +139,12 @@ function deviceMatrix(p: number, vw: number, vh: number): string {
     translate(vw / 2, vh / 2),
     mul(scale(k * zoom), mul(translate(-fx, -fy), H)),
   );
-  return toMatrix3d(M);
+  const yaw = YAW_DEG * smoothstep(clamp01((p - YAW_START) / (YAW_END - YAW_START)));
+  if (!yaw) return toMatrix3d(M);
+  // Rotácia okolo zvislej osi cez stred okna (tam je pri usadení terminál)
+  const cx = vw / 2;
+  const cy = vh / 2;
+  return `translate(${cx}px,${cy}px) perspective(${PERSPECTIVE}px) rotateY(${yaw}deg) translate(${-cx}px,${-cy}px) ${toMatrix3d(M)}`;
 }
 
 export function HeroScene(props: Props) {
@@ -203,10 +211,15 @@ function HeroAnimated({ title, titleAccent, scrollHint, imageAlt }: Props) {
   // Zostava je skrytá, kým nepoznáme veľkosť okna (žiadny záblesk neumiestneného obrázka)
   const deviceOpacity = useTransform(vw, (w) => (w ? 1 : 0));
 
-  // Pozadie scény: tmavé → brandové, potom sa rozsvieti žiara
-  const stageOpacity = useTransform(p, [0.3, 0.46], [0, 1]);
-  const glowOpacity = useTransform(p, [0.42, 0.62], [0, 1]);
-  const glowScale = useTransform(p, [0.42, 0.62], [0.7, 1]);
+  // Hlavička: keď okolie zbelie, prepne sa na svetlý tón (pozri ToneHeader)
+  useMotionValueEvent(p, "change", (v) => {
+    if (ref.current) ref.current.dataset.headerTheme = v > 0.36 ? "light" : "dark";
+  });
+
+  // Pozadie scény: brand červená → biela, potom sa rozsvieti žiara
+  const stageOpacity = useTransform(p, [0.25, 0.42], [0, 1]);
+  const glowOpacity = useTransform(p, [0.34, 0.52], [0, 1]);
+  const glowScale = useTransform(p, [0.34, 0.52], [0.7, 1]);
 
   // Nadpis a hint
   const titleOpacity = useTransform(p, [0, 0.12], [1, 0]);
@@ -219,7 +232,7 @@ function HeroAnimated({ title, titleAccent, scrollHint, imageAlt }: Props) {
     deviceMatrix(pv, w, h),
   );
   // Odlesk: drží sa do 0.28, potom sa rozplynie do UI; pásy sa pri natáčaní posúvajú
-  const reflectionOpacity = useTransform(p, [0.3, 0.55], [1, 0]);
+  const reflectionOpacity = useTransform(p, [0.2, 0.42], [1, 0]);
   // pásy odlesku: posun podľa scrollu + jemný paralax podľa kurzora
   const streakX = useTransform([p, sx], ([pv, m]: number[]) => {
     const scroll = lerp(10, -14, clamp01(pv / ZOOM_END));
@@ -232,7 +245,7 @@ function HeroAnimated({ title, titleAccent, scrollHint, imageAlt }: Props) {
       data-header-theme="dark"
       className={`relative ${HERO_HEIGHT}`}
     >
-      <div className="sticky top-0 h-svh overflow-hidden bg-navy">
+      <div className="sticky top-0 h-svh overflow-hidden bg-primary">
         {/* pozadie */}
         <motion.div
           style={{ opacity: stageOpacity }}
@@ -306,7 +319,7 @@ function HeroAnimated({ title, titleAccent, scrollHint, imageAlt }: Props) {
             <RevealWords
               text={titleAccent}
               start={title.split(" ").length}
-              className="font-normal text-primary"
+              className="font-normal text-background/90"
             />
           </h1>
           <motion.div style={{ opacity: hintOpacity }}>
@@ -325,8 +338,8 @@ function HeroAnimated({ title, titleAccent, scrollHint, imageAlt }: Props) {
 function HeroStatic({ title, titleAccent, imageAlt }: Props) {
   return (
     <section
-      data-header-theme="dark"
-      className="bg-stage relative isolate overflow-hidden px-6 py-24 text-primary-foreground"
+      data-header-theme="light"
+      className="bg-stage relative isolate overflow-hidden px-6 py-24 text-foreground"
     >
       <div className="bg-soft-glow absolute inset-0 -z-10" aria-hidden />
       <div className="mx-auto flex max-w-3xl flex-col items-center gap-10 text-center">
