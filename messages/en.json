@@ -1,0 +1,13 @@
+{
+  "Meta": {
+    "title": "Besteron POS",
+    "description": "A modern point of sale for your business."
+  },
+  "Home": {
+    "hero": {
+      "title": "The POS that makes business better",
+      "subtitle": "Placeholder text. Real content comes when we assemble the homepage.",
+      "cta": "Try it out"
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "Meta": {
+    "title": "Besteron Pokladňa",
+    "description": "Moderná pokladňa pre vašu prevádzku."
+  },
+  "Home": {
+    "hero": {
+      "title": "Pokladňa, ktorá robí biznis lepším",
+      "subtitle": "Placeholder text. Skutočný obsah doplníme pri skladaní homepage.",
+      "cta": "Vyskúšať"
+    }
+  }
+}

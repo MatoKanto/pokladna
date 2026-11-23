@@ -1,0 +1,10 @@
+/*
+ * BRAND TOKENS: jediné miesto, kde žije identita Besteron.
+ * Tému (theme.css) môžeme kedykoľvek vymeniť, brand zostane.
+ *
+ * --brand = #E21744
+ */
+:root {
+  --brand: oklch(0.5846 0.2255 18.4485);
+  --brand-foreground: oklch(0.9787 0.0017 247.8391);
+}
