@@ -5,9 +5,10 @@
   },
   "Home": {
     "hero": {
-      "title": "Pokladňa, ktorá robí biznis lepším",
+      "title": "Pokladňa, ktorá robí biznis",
       "scrollHint": "Scrolluj",
-      "imageAlt": "Platobný terminál Besteron s úvodnou obrazovkou"
+      "imageAlt": "Platobný terminál Besteron s úvodnou obrazovkou",
+      "titleAccent": "lepším"
     },
     "intro": {
       "titleStart": "Pokladňa hovorí.",
