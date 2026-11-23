@@ -7,7 +7,4 @@
 :root {
   --brand: oklch(0.5846 0.2255 18.4485);
   --brand-foreground: oklch(0.9787 0.0017 247.8391);
-
-  /* Navy z brand manuálu: #153351 */
-  --navy: oklch(0.3144 0.0649 250.6342);
 }

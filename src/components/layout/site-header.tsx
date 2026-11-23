@@ -52,7 +52,7 @@ export async function SiteHeader() {
               href={item.href}
               className={cn(
                 glassItem,
-                "rounded-full px-5 py-2.5 text-sm font-semibold transition-colors",
+                "rounded-full px-5 py-2.5 text-sm font-medium transition-colors",
               )}
             >
               {item.label}
@@ -67,7 +67,7 @@ export async function SiteHeader() {
             className={cn(
               glass,
               glassCta,
-              "flex h-11 items-center rounded-full px-5 text-sm font-semibold lg:h-14 lg:px-7",
+              "flex h-11 items-center rounded-full px-5 text-sm font-medium lg:h-14 lg:px-7",
             )}
           >
             {t("contact")}

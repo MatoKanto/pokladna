@@ -61,7 +61,7 @@ export function MobileMenu({ items, labels }: Props) {
                 key={item.href}
                 href={item.href}
                 onClick={() => setOpen(false)}
-                className={cn(glassItem, "rounded-2xl px-4 py-3 text-base font-semibold transition-colors")}
+                className={cn(glassItem, "rounded-2xl px-4 py-3 text-base font-medium transition-colors")}
               >
                 {item.label}
               </Link>
