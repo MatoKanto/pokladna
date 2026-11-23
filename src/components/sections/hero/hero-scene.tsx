@@ -68,21 +68,21 @@ function HeroAnimated({ title, scrollHint, imageAlt }: Props) {
           aria-hidden
         />
 
-        {/* nadpis */}
+        {/* nadpis + hint (hint hneď pod nadpisom ako pri Cleo) */}
         <motion.div
           style={{ opacity: titleOpacity, filter: titleBlur, scale: titleScale }}
-          className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-10 px-6 text-center"
+          className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-16 px-6 text-center md:gap-24"
         >
           <h1 className="max-w-3xl text-4xl font-medium tracking-tight text-background md:text-6xl">
             {title}
           </h1>
-        </motion.div>
-        <motion.div
-          style={{ opacity: hintOpacity }}
-          className="absolute inset-x-0 bottom-10 z-10 flex items-center justify-center gap-1 text-sm text-background/70"
-        >
-          {scrollHint}
-          <ChevronDown className="size-4" />
+          <motion.p
+            style={{ opacity: hintOpacity }}
+            className="flex items-center gap-1.5 text-xl text-background/80 md:text-2xl"
+          >
+            {scrollHint}
+            <ChevronDown className="size-5 md:size-6" />
+          </motion.p>
         </motion.div>
 
         {/* terminál */}

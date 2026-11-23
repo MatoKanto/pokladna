@@ -30,7 +30,7 @@ export async function SiteHeader() {
           aria-label={t("home")}
           className={cn(
             glass,
-            "pointer-events-auto flex h-11 items-center rounded-full px-5 transition-colors hover:bg-foreground/85 lg:h-14 lg:px-6",
+            "pointer-events-auto flex h-11 items-center rounded-full px-5 transition-colors hover:bg-background lg:h-14 lg:px-6",
           )}
         >
           <BesteronLogo className="h-5 w-auto lg:h-6" />
@@ -48,7 +48,7 @@ export async function SiteHeader() {
             <Link
               key={item.href}
               href={item.href}
-              className="rounded-full px-5 py-2.5 text-sm font-medium transition-colors hover:bg-background/15"
+              className="rounded-full px-5 py-2.5 text-sm font-medium transition-colors hover:bg-foreground/10"
             >
               {item.label}
             </Link>
@@ -61,7 +61,7 @@ export async function SiteHeader() {
             href={CONTACT_HREF}
             className={cn(
               glass,
-              "flex h-11 items-center rounded-full px-5 text-sm font-medium transition-colors hover:bg-background hover:text-foreground lg:h-14 lg:px-7",
+              "flex h-11 items-center rounded-full px-5 text-sm font-medium transition-colors hover:bg-foreground hover:text-background lg:h-14 lg:px-7",
             )}
           >
             {t("contact")}

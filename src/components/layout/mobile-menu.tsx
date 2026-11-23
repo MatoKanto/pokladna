@@ -32,7 +32,7 @@ export function MobileMenu({ items, labels }: Props) {
         onClick={() => setOpen((v) => !v)}
         className={cn(
           glass,
-          "grid size-11 place-items-center rounded-full transition-colors hover:bg-foreground/85",
+          "grid size-11 place-items-center rounded-full transition-colors hover:bg-background",
         )}
       >
         {open ? <X className="size-5" /> : <Menu className="size-5" />}
@@ -60,7 +60,7 @@ export function MobileMenu({ items, labels }: Props) {
                 key={item.href}
                 href={item.href}
                 onClick={() => setOpen(false)}
-                className="rounded-2xl px-4 py-3 text-base font-medium transition-colors hover:bg-background/15"
+                className="rounded-2xl px-4 py-3 text-base font-medium transition-colors hover:bg-foreground/10"
               >
                 {item.label}
               </Link>
