@@ -8,7 +8,21 @@
       "title": "The POS that makes business",
       "scrollHint": "Scroll",
       "imageAlt": "Besteron payment terminal showing the home screen",
-      "titleAccent": "better"
+      "titleAccent": "better",
+      "features": [
+        {
+          "title": "Card and cash",
+          "text": "The terminal sits right at the checkout."
+        },
+        {
+          "title": "eKasa included",
+          "text": "Legally compliant receipts, no extra box."
+        },
+        {
+          "title": "Works offline",
+          "text": "Keep selling, the data syncs on its own."
+        }
+      ]
     },
     "intro": {
       "titleStart": "The POS talks.",

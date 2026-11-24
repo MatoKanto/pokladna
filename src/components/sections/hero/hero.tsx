@@ -11,6 +11,7 @@ export async function Hero() {
       titleAccent={t("titleAccent")}
       scrollHint={t("scrollHint")}
       imageAlt={t("imageAlt")}
+      features={t.raw("features") as { title: string; text: string }[]}
     />
   );
 }

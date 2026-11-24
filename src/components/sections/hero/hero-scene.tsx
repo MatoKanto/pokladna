@@ -11,6 +11,7 @@ import {
   useScroll,
   useSpring,
   useTransform,
+  type MotionValue,
 } from "motion/react";
 import { RevealWords } from "./reveal-words";
 import {
@@ -24,6 +25,7 @@ type Props = {
   titleAccent: string;
   scrollHint: string;
   imageAlt: string;
+  features: { title: string; text: string }[];
 };
 
 /**
@@ -45,9 +47,11 @@ type Props = {
  *  od 0.70    ďalšia sekcia ho prekryje zdola
  *
  * Prekrytie zabezpečuje `Intro` so záporným horným okrajom 100svh. Začína sa pri
- * p = (H - 200svh) / (H - 100svh); pre H = 440svh je to ≈ 0.71.
+ * p = (H - 200svh) / (H - 100svh); pre H = 480svh je to ≈ 0.74.
+ *
+ *  0.44–0.66  karty s výhodami sa postupne zjavujú (glassmorphism, FeatureCard)
  */
-const HERO_HEIGHT = "h-[440svh]";
+const HERO_HEIGHT = "h-[480svh]";
 const ROTATE_START = 0.22;
 const ROTATE_END = 0.68;
 const ZOOM_END = 0.45;
@@ -76,7 +80,13 @@ export function HeroScene(props: Props) {
   return reduced ? <HeroStatic {...props} /> : <HeroAnimated {...props} />;
 }
 
-function HeroAnimated({ title, titleAccent, scrollHint, imageAlt }: Props) {
+function HeroAnimated({
+  title,
+  titleAccent,
+  scrollHint,
+  imageAlt,
+  features,
+}: Props) {
   const ref = useRef<HTMLElement>(null);
   const { scrollYProgress: p } = useScroll({
     target: ref,
@@ -231,6 +241,19 @@ function HeroAnimated({ title, titleAccent, scrollHint, imageAlt }: Props) {
           </motion.div>
         </motion.div>
 
+        {/* karty s výhodami: po bokoch terminálu (desktop) / jedna po druhej dole (mobil) */}
+        {features.map((f, i) => (
+          <FeatureCard
+            key={f.title}
+            p={p}
+            vw={vw}
+            index={i}
+            count={features.length}
+            title={f.title}
+            text={f.text}
+          />
+        ))}
+
         {/* terminál */}
         <div className="absolute inset-0 grid place-items-center">
           <motion.div
@@ -273,8 +296,66 @@ function HeroAnimated({ title, titleAccent, scrollHint, imageAlt }: Props) {
   );
 }
 
+/** Kedy sa karta objaví (scroll progress); karty sa striedajú v rozstupe STEP. */
+const CARD_START = 0.44;
+const CARD_STEP = 0.075;
+
+// Desktop: po bokoch terminálu (jeho šírka ≈ 34svh), striedavo vľavo/vpravo
+const CARD_POS = [
+  "lg:left-[calc(50%-18svh-1.5rem-17rem)] lg:top-[24%]",
+  "lg:left-[calc(50%+18svh+1.5rem)] lg:top-[42%]",
+  "lg:left-[calc(50%-18svh-1.5rem-17rem)] lg:top-[60%]",
+];
+
+/**
+ * Glassmorphism karta s výhodou. Objaví sa pri scrolle (fade + posun), na desktope
+ * ostane; na mobile je viditeľná vždy len jedna (v spodnom slote) a ďalšia ju strieda.
+ */
+function FeatureCard({
+  p,
+  vw,
+  index,
+  count,
+  title,
+  text,
+}: {
+  p: MotionValue<number>;
+  vw: MotionValue<number>;
+  index: number;
+  count: number;
+  title: string;
+  text: string;
+}) {
+  const from = CARD_START + index * CARD_STEP;
+  const opacity = useTransform([p, vw], ([pv, w]: number[]) => {
+    const fadeIn = clamp01((pv - from) / 0.05);
+    if (w >= 1024 || index === count - 1) return fadeIn;
+    const next = from + CARD_STEP;
+    return fadeIn * (1 - clamp01((pv - next) / 0.04)); // mobil: ustúpi ďalšej karte
+  });
+  const y = useTransform(p, (pv) => 28 * (1 - clamp01((pv - from) / 0.05)));
+  return (
+    <motion.div
+      style={{ opacity, y }}
+      className={`pointer-events-none absolute inset-x-5 bottom-6 z-10 rounded-3xl bg-background/15 px-6 py-5 text-background shadow-[0_8px_32px_-8px] shadow-foreground/30 ring-1 ring-background/30 backdrop-blur-xl backdrop-saturate-150 lg:inset-x-auto lg:bottom-auto lg:w-[17rem] lg:py-6 ${CARD_POS[index] ?? ""}`}
+    >
+      {/* jemný odlesk na hrane skla */}
+      <div
+        aria-hidden
+        className="absolute inset-0 rounded-3xl bg-gradient-to-br from-background/25 via-transparent to-transparent"
+      />
+      <h2 className="relative text-xl font-extrabold tracking-tight lg:text-2xl">
+        {title}
+      </h2>
+      <p className="relative mt-1 text-sm leading-snug text-background/85 lg:text-base">
+        {text}
+      </p>
+    </motion.div>
+  );
+}
+
 /** Varianta pre prefers-reduced-motion: žiadny pohyb, hotový stav. */
-function HeroStatic({ title, titleAccent, imageAlt }: Props) {
+function HeroStatic({ title, titleAccent, imageAlt, features }: Props) {
   return (
     <section data-header-theme="dark" className="bg-stage relative isolate overflow-hidden px-6 py-24 text-primary-foreground">
       <div className="bg-soft-glow absolute inset-0 -z-10" aria-hidden />
@@ -295,6 +376,17 @@ function HeroStatic({ title, titleAccent, imageAlt }: Props) {
             className="object-contain"
           />
         </div>
+        <ul className="grid w-full gap-3 sm:grid-cols-3">
+          {features.map((f) => (
+            <li
+              key={f.title}
+              className="rounded-3xl bg-background/15 px-5 py-4 ring-1 ring-background/30 backdrop-blur-xl"
+            >
+              <h2 className="text-xl font-extrabold tracking-tight">{f.title}</h2>
+              <p className="mt-1 text-sm text-background/85">{f.text}</p>
+            </li>
+          ))}
+        </ul>
       </div>
     </section>
   );
