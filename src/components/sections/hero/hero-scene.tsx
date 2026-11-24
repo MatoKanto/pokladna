@@ -3,13 +3,16 @@
 import Image from "next/image";
 import { useEffect, useRef } from "react";
 import {
+  animate,
   motion,
+  useMotionTemplate,
   useMotionValue,
   useReducedMotion,
   useScroll,
+  useSpring,
   useTransform,
 } from "motion/react";
-import { ChevronDown } from "lucide-react";
+import { RevealWords } from "./reveal-words";
 import {
   SEQUENCE,
   TerminalSequence,
@@ -18,6 +21,7 @@ import {
 
 type Props = {
   title: string;
+  titleAccent: string;
   scrollHint: string;
   imageAlt: string;
 };
@@ -72,7 +76,7 @@ export function HeroScene(props: Props) {
   return reduced ? <HeroStatic {...props} /> : <HeroAnimated {...props} />;
 }
 
-function HeroAnimated({ title, scrollHint, imageAlt }: Props) {
+function HeroAnimated({ title, titleAccent, scrollHint, imageAlt }: Props) {
   const ref = useRef<HTMLElement>(null);
   const { scrollYProgress: p } = useScroll({
     target: ref,
@@ -132,9 +136,49 @@ function HeroAnimated({ title, scrollHint, imageAlt }: Props) {
   // Pred prvým meraním okna je terminál skrytý (žiadny záblesk neumiestneného obrázka)
   const terminalOpacity = useTransform(vw, (w) => (w ? 1 : 0));
 
+  // Kurzor (0 až 1 v rámci okna): posúva pásy odlesku a vedie mäkký reflektor.
+  // Kým sa myš nepohne (alebo na dotykových zariadeniach), reflektor pomaly sám pláva.
+  const px = useMotionValue(0.62);
+  const py = useMotionValue(0.35);
+  const sx = useSpring(px, { stiffness: 50, damping: 20 });
+  const sy = useSpring(py, { stiffness: 50, damping: 20 });
+  useEffect(() => {
+    const idle = [
+      animate(px, [0.62, 0.4, 0.58, 0.62], {
+        duration: 22,
+        repeat: Infinity,
+        ease: "easeInOut",
+      }),
+      animate(py, [0.35, 0.5, 0.4, 0.35], {
+        duration: 26,
+        repeat: Infinity,
+        ease: "easeInOut",
+      }),
+    ];
+    const onMove = (e: PointerEvent) => {
+      if (e.pointerType !== "mouse") return;
+      idle.forEach((a) => a.stop());
+      px.set(e.clientX / window.innerWidth);
+      py.set(e.clientY / window.innerHeight);
+    };
+    window.addEventListener("pointermove", onMove);
+    return () => {
+      idle.forEach((a) => a.stop());
+      window.removeEventListener("pointermove", onMove);
+    };
+  }, [px, py]);
+  const spotX = useTransform(sx, (v) => v * 100);
+  const spotY = useTransform(sy, (v) => v * 100);
+  const spotlight = useMotionTemplate`radial-gradient(45vmax circle at ${spotX}% ${spotY}%, color-mix(in oklch, var(--primary-foreground) 15%, transparent), transparent 62%)`;
+  const introLightOpacity = useTransform(p, [0, 0.14], [1, 0]);
+
   // Sklo displeja: drží sa, kým je pohľad takmer čelný, potom sa rozplynie do UI
   const glassOpacity = useTransform(p, [0.2, 0.4], [1, 0]);
-  const streakX = useTransform(p, [0, 0.4], ["8%", "-16%"]);
+  // pásy odlesku: posun podľa scrollu + jemný paralax podľa kurzora
+  const streakX = useTransform([p, sx], ([pv, m]: number[]) => {
+    const scroll = 8 + (-16 - 8) * Math.min(1, pv / 0.4);
+    return `${scroll + (m - 0.5) * 10}%`;
+  });
   // Pri štarte (displej = celé okno) je nadpis nad sklom a rozmaže sa spolu s ním
 
   return (
@@ -156,21 +200,35 @@ function HeroAnimated({ title, scrollHint, imageAlt }: Props) {
           aria-hidden
         />
 
+        {/* úvodné sklo: reflektor pod kurzorom a občasný prejazd svetla */}
+        <motion.div
+          aria-hidden
+          style={{ opacity: introLightOpacity }}
+          className="pointer-events-none absolute inset-0 z-[5] overflow-hidden"
+        >
+          <motion.div style={{ background: spotlight }} className="absolute inset-0" />
+          <div className="glint absolute -inset-y-[10%] left-0 w-[22vw]" />
+        </motion.div>
+
         {/* nadpis + hint (hint hneď pod nadpisom ako pri Cleo) */}
         <motion.div
           style={{ opacity: titleOpacity, filter: titleBlur, scale: titleScale }}
           className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-16 px-6 text-center md:gap-24"
         >
-          <h1 className="max-w-3xl text-4xl font-medium tracking-tight text-background md:text-6xl">
-            {title}
+          <h1 className="max-w-3xl text-4xl font-extrabold tracking-tight text-background md:text-6xl">
+            <RevealWords text={title} />{" "}
+            <RevealWords
+              text={titleAccent}
+              start={title.split(" ").length}
+              className="font-normal text-background/90"
+            />
           </h1>
-          <motion.p
-            style={{ opacity: hintOpacity }}
-            className="flex items-center gap-1.5 text-xl text-background/80 md:text-2xl"
-          >
-            {scrollHint}
-            <ChevronDown className="size-5 md:size-6" />
-          </motion.p>
+          <motion.div style={{ opacity: hintOpacity }}>
+            <div className="hint-in flex flex-col items-center gap-3 text-xl text-background/80 md:text-2xl">
+              {scrollHint}
+              <div className="scroll-drip" aria-hidden />
+            </div>
+          </motion.div>
         </motion.div>
 
         {/* terminál */}
@@ -216,13 +274,13 @@ function HeroAnimated({ title, scrollHint, imageAlt }: Props) {
 }
 
 /** Varianta pre prefers-reduced-motion: žiadny pohyb, hotový stav. */
-function HeroStatic({ title, imageAlt }: Props) {
+function HeroStatic({ title, titleAccent, imageAlt }: Props) {
   return (
     <section data-header-theme="dark" className="bg-stage relative isolate overflow-hidden px-6 py-24 text-primary-foreground">
       <div className="bg-soft-glow absolute inset-0 -z-10" aria-hidden />
       <div className="mx-auto flex max-w-3xl flex-col items-center gap-10 text-center">
-        <h1 className="text-4xl font-medium tracking-tight md:text-6xl">
-          {title}
+        <h1 className="text-4xl font-extrabold tracking-tight md:text-6xl">
+          {title} <span className="font-normal">{titleAccent}</span>
         </h1>
         <div
           className="relative h-[70svh]"

@@ -5,9 +5,10 @@
   },
   "Home": {
     "hero": {
-      "title": "The POS that makes business better",
+      "title": "The POS that makes business",
       "scrollHint": "Scroll",
-      "imageAlt": "Besteron payment terminal showing the home screen"
+      "imageAlt": "Besteron payment terminal showing the home screen",
+      "titleAccent": "better"
     },
     "intro": {
       "titleStart": "The POS talks.",

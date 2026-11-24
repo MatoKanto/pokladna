@@ -57,3 +57,95 @@
       transparent 70%
     );
 }
+/* ---------- Úvodná obrazovka: animácie ---------- */
+
+/* Nadpis: slová sa postupne vynoria (čisté CSS, bez čakania na hydratáciu). */
+.word-reveal {
+  display: inline-block;
+  opacity: 0;
+  animation: word-in 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+  animation-delay: calc(var(--i, 0) * 90ms + 150ms);
+}
+@keyframes word-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.35em);
+    filter: blur(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+}
+
+/* Prejazd svetla cez sklo displeja. */
+.glint {
+  background: linear-gradient(
+    100deg,
+    transparent,
+    color-mix(in oklch, var(--primary-foreground) 9%, transparent) 50%,
+    transparent
+  );
+  transform: translateX(-30vw) skewX(-18deg);
+  animation: glint 9s cubic-bezier(0.4, 0, 0.2, 1) 2.5s infinite;
+}
+@keyframes glint {
+  0% {
+    transform: translateX(-30vw) skewX(-18deg);
+  }
+  35%,
+  100% {
+    transform: translateX(130vw) skewX(-18deg);
+  }
+}
+
+/* "Scroll" hint: objaví sa po nadpise, tenká čiara s kvapkou smerom dole. */
+.hint-in {
+  opacity: 0;
+  animation: hint-in 0.8s ease-out 1.4s forwards;
+}
+@keyframes hint-in {
+  to {
+    opacity: 1;
+  }
+}
+.scroll-drip {
+  position: relative;
+  overflow: hidden;
+  height: 2.5rem;
+  width: 1px;
+  background: color-mix(in oklch, var(--background) 25%, transparent);
+}
+.scroll-drip::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 45%;
+  background: var(--background);
+  animation: drip 1.9s cubic-bezier(0.6, 0, 0.3, 1) infinite;
+}
+@keyframes drip {
+  from {
+    transform: translateY(-110%);
+  }
+  to {
+    transform: translateY(260%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .word-reveal,
+  .hint-in {
+    animation: none;
+    opacity: 1;
+  }
+  .glint,
+  .scroll-drip::after {
+    animation: none;
+  }
+  .glint {
+    display: none;
+  }
+}
