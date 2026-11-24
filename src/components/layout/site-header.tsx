@@ -3,6 +3,7 @@ import { BesteronLogo } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
+import { AutoHideHeader } from "./auto-hide-header";
 import { DesktopNav, type NavProduct } from "./desktop-nav";
 import { glass, glassItem } from "./glass";
 import { LocaleSwitcher } from "./locale-switcher";
@@ -37,11 +38,12 @@ export async function SiteHeader() {
   const links = LINKS.map(({ key, href }) => ({ href, label: t(`items.${key}`) }));
 
   return (
-    <header className="fixed inset-x-0 top-3 z-50 px-3 lg:top-4 lg:px-6">
+    // šírka zhodná s kontajnerom sekcie „Pozrite sa bližšie“ (closer-look.tsx)
+    <AutoHideHeader className="fixed inset-x-0 top-3 z-50 px-4 md:px-8 lg:top-4">
       <div
         className={cn(
           glass,
-          "mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 rounded-full pl-5 pr-2 lg:h-16 lg:pl-7",
+          "mx-auto flex h-14 w-full items-center justify-between gap-4 rounded-full pl-5 pr-2 lg:h-16 lg:w-[88%] lg:max-w-[96rem] lg:pl-7",
         )}
       >
         <Link href="/" aria-label={t("home")} className="shrink-0">
@@ -86,6 +88,6 @@ export async function SiteHeader() {
           />
         </div>
       </div>
-    </header>
+    </AutoHideHeader>
   );
 }
