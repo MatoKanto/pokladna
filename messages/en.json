@@ -5,10 +5,10 @@
   },
   "Home": {
     "hero": {
-      "title": "The POS that makes business",
-      "scrollHint": "Scroll",
+      "title": "The whole checkout.",
+      "scrollHint": "Scroll down",
       "imageAlt": "Besteron payment terminal showing the home screen",
-      "titleAccent": "better",
+      "titleAccent": "In one hand.",
       "features": [
         {
           "title": "Card and cash",
@@ -22,7 +22,8 @@
           "title": "Works offline",
           "text": "Keep selling, the data syncs on its own."
         }
-      ]
+      ],
+      "eyebrow": "Besteron POS"
     },
     "closerLook": {
       "title": "Take a closer look",

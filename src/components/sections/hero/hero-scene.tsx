@@ -21,6 +21,7 @@ import {
 } from "./terminal-sequence";
 
 type Props = {
+  eyebrow: string;
   title: string;
   titleAccent: string;
   scrollHint: string;
@@ -81,6 +82,7 @@ export function HeroScene(props: Props) {
 }
 
 function HeroAnimated({
+  eyebrow,
   title,
   titleAccent,
   scrollHint,
@@ -249,14 +251,21 @@ function HeroAnimated({
           style={{ opacity: titleOpacity, filter: titleBlur, scale: titleScale, visibility: titleVis }}
           className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-16 px-6 text-center md:gap-24"
         >
-          <h1 className="max-w-3xl text-4xl font-extrabold tracking-tight text-background md:text-6xl">
-            <RevealWords text={title} />{" "}
-            <RevealWords
-              text={titleAccent}
-              start={title.split(" ").length}
-              className="font-normal text-background/90"
-            />
-          </h1>
+          <div className="flex flex-col items-center gap-4 md:gap-5">
+            <p className="text-sm font-semibold tracking-wide text-background/85 md:text-base">
+              <RevealWords text={eyebrow} />
+            </p>
+            <h1 className="max-w-3xl text-4xl font-extrabold tracking-tight text-background md:text-7xl">
+              <RevealWords text={title} start={eyebrow.split(" ").length} />
+              <span className="block">
+                <RevealWords
+                  text={titleAccent}
+                  start={eyebrow.split(" ").length + title.split(" ").length}
+                  className="text-background/75"
+                />
+              </span>
+            </h1>
+          </div>
           <motion.div style={{ opacity: hintOpacity }}>
             <div className="hint-in flex flex-col items-center gap-3 text-xl text-background/80 md:text-2xl">
               {scrollHint}
@@ -381,13 +390,14 @@ function FeatureCard({
 }
 
 /** Varianta pre prefers-reduced-motion: žiadny pohyb, hotový stav. */
-function HeroStatic({ title, titleAccent, imageAlt, features }: Props) {
+function HeroStatic({ eyebrow, title, titleAccent, imageAlt, features }: Props) {
   return (
     <section data-header-theme="dark" className="bg-stage relative isolate overflow-hidden px-6 py-24 text-primary-foreground">
       <div className="bg-soft-glow absolute inset-0 -z-10" aria-hidden />
       <div className="mx-auto flex max-w-3xl flex-col items-center gap-10 text-center">
+        <p className="text-sm font-semibold tracking-wide md:text-base">{eyebrow}</p>
         <h1 className="text-4xl font-extrabold tracking-tight md:text-6xl">
-          {title} <span className="font-normal">{titleAccent}</span>
+          {title} <span className="block text-primary-foreground/75">{titleAccent}</span>
         </h1>
         <div
           className="relative h-[70svh]"
