@@ -61,7 +61,7 @@ export async function SiteFooter() {
         <div className="grid gap-12 border-b border-foreground/10 py-12 md:grid-cols-[1fr_auto] md:py-16">
           <div>
             <Link href="/" aria-label={t("home")} className="inline-block">
-              <BesteronLogo className="h-7 w-auto" />
+              <BesteronLogo className="h-7 w-auto text-primary" />
             </Link>
             <p className="mt-4 max-w-xs text-sm text-muted-foreground">{t("tagline")}</p>
           </div>
