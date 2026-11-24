@@ -59,55 +59,55 @@ export function CloserLookExplorer({ items, imageAlt, photoAlt }: Props) {
   return (
     <MotionConfig reducedMotion="user" transition={spring}>
       <div className="relative flex flex-col overflow-hidden rounded-[2rem] bg-muted md:block md:min-h-[42rem] lg:min-h-[46rem]">
-        {/* fotka cez celý blok (na mobile len cez vizuál) */}
-        <AnimatePresence initial={false}>
-          {photo && (
+        {/* vizuál: každý záber vplýva zprava, starý sa rozplynie (ako pri Apple) */}
+        <div className="pointer-events-none relative h-[28rem] md:absolute md:inset-0 md:z-[1] md:h-auto">
+          <AnimatePresence initial={false}>
             <motion.div
-              key={photo}
-              initial={{ opacity: 0, scale: 1.04 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-              className="pointer-events-none absolute inset-x-0 top-0 z-[1] h-[28rem] md:inset-0 md:h-auto"
-            >
-              <Image
-                src={photo}
-                alt={photoAlt}
-                fill
-                sizes="(min-width: 1152px) 1152px, 100vw"
-                className="object-cover object-[60%_center]"
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* terminál */}
-        <div
-          aria-hidden
-          className="pointer-events-none relative h-[28rem] overflow-hidden md:absolute md:inset-y-0 md:right-0 md:left-[42%] md:h-auto"
-        >
-          <div className="absolute inset-0 grid place-items-center">
-            <motion.div
-              initial={false}
+              key={active}
+              initial={{ opacity: 0, x: "14%" }}
               animate={{
-                opacity: photo ? 0 : 1,
-                scale: focus.s,
-                x: `${(50 - focus.ox) * focus.s}%`,
-                y: `${(50 - focus.oy) * focus.s}%`,
-                rotate: focus.r ?? 0,
+                opacity: 1,
+                x: 0,
+                transition: { duration: 0.75, ease: [0.22, 1, 0.36, 1] },
               }}
-              transition={{ type: "spring", stiffness: 120, damping: 26 }}
-              className="relative aspect-[1128/1901] h-[85%] will-change-transform"
+              exit={{
+                opacity: 0,
+                x: "-3%",
+                transition: { duration: 0.4, ease: [0.4, 0, 1, 1] },
+              }}
+              className="absolute inset-0 overflow-hidden will-change-transform"
             >
-              <Image
-                src="/images/terminal.webp"
-                alt={imageAlt}
-                fill
-                sizes="(min-width: 768px) 40vw, 80vw"
-                className="object-contain"
-              />
+              {photo ? (
+                <Image
+                  src={photo}
+                  alt={photoAlt}
+                  fill
+                  sizes="(min-width: 1152px) 1152px, 100vw"
+                  className="object-cover object-[60%_center]"
+                />
+              ) : (
+                <div
+                  aria-hidden
+                  className="absolute inset-0 grid place-items-center md:left-[42%]"
+                >
+                  <div
+                    style={{
+                      transform: `translate(${(50 - focus.ox) * focus.s}%, ${(50 - focus.oy) * focus.s}%) rotate(${focus.r ?? 0}deg) scale(${focus.s})`,
+                    }}
+                    className="relative aspect-[1128/1901] h-[85%]"
+                  >
+                    <Image
+                      src="/images/terminal.webp"
+                      alt={imageAlt}
+                      fill
+                      sizes="(min-width: 768px) 40vw, 80vw"
+                      className="object-contain"
+                    />
+                  </div>
+                </div>
+              )}
             </motion.div>
-          </div>
+          </AnimatePresence>
         </div>
 
         {/* zoznam */}
