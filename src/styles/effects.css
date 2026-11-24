@@ -26,16 +26,17 @@
 
 /*
  * Odlesk na displeji terminálu (tmavé sklo so svetelnými pásmi), len z tokenov.
- * .glass-base = tmavý základ s brand tónom, .glass-streaks = svetelné pásy.
+ * .glass-base = hlboká brand červená, .glass-streaks = svetelné pásy.
  */
 .glass-base {
+  /* hlboká brand červená (brand zmiešaná s čiernou), jemný svetlý lesk zhora */
   background:
     linear-gradient(
       180deg,
-      color-mix(in oklch, var(--primary-foreground) 5%, transparent),
+      color-mix(in oklch, var(--primary-foreground) 8%, transparent),
       transparent 45%
     ),
-    color-mix(in oklch, var(--primary) 16%, var(--foreground));
+    color-mix(in oklch, var(--primary) 82%, black);
 }
 .glass-streaks {
   background:

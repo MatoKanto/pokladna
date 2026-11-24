@@ -22,6 +22,7 @@ import {
 
 type Props = {
   eyebrow: string;
+  subtitle: string;
   title: string;
   titleAccent: string;
   scrollHint: string;
@@ -83,6 +84,7 @@ export function HeroScene(props: Props) {
 
 function HeroAnimated({
   eyebrow,
+  subtitle,
   title,
   titleAccent,
   scrollHint,
@@ -265,6 +267,9 @@ function HeroAnimated({
                 />
               </span>
             </h1>
+            <p className="hint-in mt-1 max-w-xl text-base leading-snug text-background/85 md:mt-2 md:text-xl">
+              {subtitle}
+            </p>
           </div>
           <motion.div style={{ opacity: hintOpacity }}>
             <div className="hint-in flex flex-col items-center gap-3 text-xl text-background/80 md:text-2xl">
@@ -390,7 +395,7 @@ function FeatureCard({
 }
 
 /** Varianta pre prefers-reduced-motion: žiadny pohyb, hotový stav. */
-function HeroStatic({ eyebrow, title, titleAccent, imageAlt, features }: Props) {
+function HeroStatic({ eyebrow, subtitle, title, titleAccent, imageAlt, features }: Props) {
   return (
     <section data-header-theme="dark" className="bg-stage relative isolate overflow-hidden px-6 py-24 text-primary-foreground">
       <div className="bg-soft-glow absolute inset-0 -z-10" aria-hidden />
@@ -399,6 +404,7 @@ function HeroStatic({ eyebrow, title, titleAccent, imageAlt, features }: Props) 
         <h1 className="text-4xl font-extrabold tracking-tight md:text-6xl">
           {title} <span className="block text-primary-foreground/75">{titleAccent}</span>
         </h1>
+        <p className="max-w-xl md:text-xl">{subtitle}</p>
         <div
           className="relative h-[70svh]"
           style={{ aspectRatio: `${SEQ_W} / ${SEQ_H}` }}

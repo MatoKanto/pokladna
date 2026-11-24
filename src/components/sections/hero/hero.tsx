@@ -8,6 +8,7 @@ export async function Hero() {
   return (
     <HeroScene
       eyebrow={t("eyebrow")}
+      subtitle={t("subtitle")}
       title={t("title")}
       titleAccent={t("titleAccent")}
       scrollHint={t("scrollHint")}
