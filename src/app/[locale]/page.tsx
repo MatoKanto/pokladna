@@ -1,6 +1,6 @@
 import { setRequestLocale } from "next-intl/server";
 import { Hero } from "@/components/sections/hero/hero";
-import { Intro } from "@/components/sections/intro";
+import { CloserLook } from "@/components/sections/closer-look/closer-look";
 
 export default async function HomePage({ params }: PageProps<"/[locale]">) {
   const { locale } = await params;
@@ -9,7 +9,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
   return (
     <main>
       <Hero />
-      <Intro />
+      <CloserLook />
     </main>
   );
 }
