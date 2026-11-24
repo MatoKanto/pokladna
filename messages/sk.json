@@ -5,10 +5,10 @@
   },
   "Home": {
     "hero": {
-      "title": "Pokladňa, ktorá robí biznis",
-      "scrollHint": "Scrolluj",
+      "title": "Celá pokladňa.",
+      "scrollHint": "Scrollujte nižšie",
       "imageAlt": "Platobný terminál Besteron s úvodnou obrazovkou",
-      "titleAccent": "lepším",
+      "titleAccent": "V jednej ruke.",
       "features": [
         {
           "title": "Karta aj hotovosť",
@@ -22,7 +22,9 @@
           "title": "Aj bez internetu",
           "text": "Predávate ďalej, dáta sa dorovnajú samé."
         }
-      ]
+      ],
+      "eyebrow": "Besteron Pokladňa",
+      "subtitle": "Predaj, platby kartou aj doklady v jednom zariadení. Príde už nastavené, stačí ho zapnúť."
     },
     "closerLook": {
       "title": "Pozrite sa bližšie",
