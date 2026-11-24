@@ -8,6 +8,10 @@ Použitie:
 Požiadavky: ffmpeg, python3 s numpy, opencv-python-headless, pillow.
 Video: terminál na čisto bielom pozadí (255,255,255), pevná kamera, plné otočenie.
 
+Rozlíšenie: prvých HI_COUNT snímok (čelný pohľad, veľké priblíženie na štarte scény)
+ostáva v plnom rozlíšení, ostatné (terminál už malý) sa zmenšia na LO_SCALE, aby bol
+balík snímok malý. Plátno v prehliadači má rozlíšenie plnej snímky.
+
 Poradie snímok je dané FRAME_PLAN: snímky videa (číslované od 1) v poradí, v akom sa
 majú prehrávať pri scrolle (čelný pohľad → finálny uhol).
 """
@@ -23,8 +27,12 @@ from matte import matte  # noqa: E402
 # Čelný pohľad je okolo snímky 76, finálny uhol (rukoväť vpravo) je snímka 1 (= začiatok
 # slučky). Video sa prehráva dozadu: 76 → 1.
 FRAME_PLAN = list(range(76, 0, -1))
-PAD = 4  # px okolo ohraničenia
-WEBP_QUALITY = 82
+PAD = 6  # px okolo ohraničenia
+WEBP_QUALITY = 80
+HI_COUNT = 24      # počet snímok v plnom rozlíšení (od čelného pohľadu)
+LO_SCALE = 0.75    # mierka ostatných snímok
+# Výrez videa, v ktorom je terminál vždy celý (šírka:výška:x:y, pre 3840×2160)
+CROP = "1240:2020:1300:80"
 
 
 def main(video: str, out_dir: str) -> None:
@@ -35,7 +43,12 @@ def main(video: str, out_dir: str) -> None:
 
     with tempfile.TemporaryDirectory() as tmp:
         subprocess.run(
-            ["ffmpeg", "-v", "error", "-y", "-i", video, f"{tmp}/f%03d.png"], check=True
+            [
+                "ffmpeg", "-v", "error", "-y", "-i", video,
+                "-vf", f"crop={CROP}", "-frames:v", str(max(FRAME_PLAN)),
+                f"{tmp}/f%03d.png",
+            ],
+            check=True,
         )
         rgba = []
         for n in FRAME_PLAN:
@@ -55,9 +68,13 @@ def main(video: str, out_dir: str) -> None:
     total = 0
     for i, m in enumerate(rgba):
         path = out / f"{i:03d}.webp"
-        Image.fromarray(m[y0:y1, x0:x1]).save(
-            path, "WEBP", quality=WEBP_QUALITY, alpha_quality=90, method=6
-        )
+        img = Image.fromarray(m[y0:y1, x0:x1])
+        if i >= HI_COUNT:
+            img = img.resize(
+                (round(img.width * LO_SCALE), round(img.height * LO_SCALE)),
+                Image.LANCZOS,
+            )
+        img.save(path, "WEBP", quality=WEBP_QUALITY, alpha_quality=90, method=6)
         total += path.stat().st_size
 
     meta = {"frames": len(rgba), "width": int(x1 - x0), "height": int(y1 - y0)}

@@ -57,12 +57,12 @@ const ROTATE_END = 0.68;
 const ZOOM_END = 0.45;
 
 // Displej v prvej (čelnej) snímke sekvencie, ako zlomok rozmerov snímky
-// (zmerané: x 55–320, y 210–760 z 370 × 812 px)
+// (zmerané: x 118–706, y 460–1690 z 813 × 1788 px)
 const SCREEN = {
-  left: 55 / 370,
-  right: 320 / 370,
-  top: 210 / 812,
-  bottom: 760 / 812,
+  left: 118 / 813,
+  right: 706 / 813,
+  top: 460 / 1788,
+  bottom: 1690 / 1788,
 };
 const SCREEN_CX = (SCREEN.left + SCREEN.right) / 2;
 const SCREEN_CY = (SCREEN.top + SCREEN.bottom) / 2;

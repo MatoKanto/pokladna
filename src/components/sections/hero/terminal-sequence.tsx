@@ -85,20 +85,14 @@ export function TerminalSequence({
     };
   }, [draw]);
 
-  // Rozlíšenie plátna podľa veľkosti na obrazovke (a hustoty pixelov)
+  // Plátno má rozlíšenie plnej snímky (nie veľkosť na obrazovke), lebo scéna terminál
+  // pri štarte mnohonásobne zväčšuje; prehliadač ho podľa potreby zmenší.
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const fit = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      canvas.width = Math.round(canvas.clientWidth * dpr);
-      canvas.height = Math.round(canvas.clientHeight * dpr);
-      draw();
-    };
-    fit();
-    const ro = new ResizeObserver(fit);
-    ro.observe(canvas);
-    return () => ro.disconnect();
+    canvas.width = meta.width;
+    canvas.height = meta.height;
+    draw();
   }, [draw]);
 
   return (
