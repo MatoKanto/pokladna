@@ -81,5 +81,34 @@
     "closeMenu": "Close menu",
     "home": "Besteron, home",
     "primary": "Main navigation"
+  },
+  "Footer": {
+    "cta": {
+      "title": "Ready to speed up sales with the Besteron POS?",
+      "button": "Get the POS"
+    },
+    "home": "Besteron, home",
+    "tagline": "A modern point of sale for your business.",
+    "links": {
+      "title": "Links",
+      "items": {
+        "products": "Products",
+        "about": "About",
+        "blog": "Blog",
+        "contact": "Contact"
+      }
+    },
+    "socials": "Socials",
+    "contact": {
+      "phone": "Phone",
+      "email": "Email",
+      "location": "Address",
+      "address": "Prešovská 38/B, 821 02 Bratislava, Slovakia"
+    },
+    "copyright": "© {year} Besteron a.s. All rights reserved.",
+    "legal": {
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service"
+    }
   }
 }

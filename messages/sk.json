@@ -81,5 +81,34 @@
     "closeMenu": "Zavrieť menu",
     "home": "Besteron, domov",
     "primary": "Hlavná navigácia"
+  },
+  "Footer": {
+    "cta": {
+      "title": "Pripravení zrýchliť predaj s pokladňou Besteron?",
+      "button": "Chcem pokladňu"
+    },
+    "home": "Besteron, domov",
+    "tagline": "Moderná pokladňa pre vašu prevádzku.",
+    "links": {
+      "title": "Odkazy",
+      "items": {
+        "products": "Produkty",
+        "about": "O nás",
+        "blog": "Blog",
+        "contact": "Kontakt"
+      }
+    },
+    "socials": "Sociálne siete",
+    "contact": {
+      "phone": "Telefón",
+      "email": "E-mail",
+      "location": "Adresa",
+      "address": "Prešovská 38/B, 821 02 Bratislava"
+    },
+    "copyright": "© {year} Besteron a.s. Všetky práva vyhradené.",
+    "legal": {
+      "privacy": "Ochrana osobných údajov",
+      "terms": "Obchodné podmienky"
+    }
   }
 }
