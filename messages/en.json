@@ -24,11 +24,47 @@
         }
       ]
     },
-    "intro": {
-      "titleStart": "The POS talks.",
-      "titleAccent": "Your language.",
-      "text": "Placeholder text. The content of the next sections comes when we assemble the homepage.",
-      "cta": "Try it out"
+    "closerLook": {
+      "title": "Take a closer look",
+      "imageAlt": "Besteron payment terminal",
+      "photoAlt": "A customer paying by phone at a café counter",
+      "items": {
+        "tap": {
+          "label": "Tap, tap, paid",
+          "title": "Tap, tap, paid.",
+          "text": "Colour-coded categories and search. Find any item with one tap, no scrolling."
+        },
+        "split": {
+          "label": "Paying separately?",
+          "title": "Paying separately?",
+          "text": "No problem. Split the table's bill with one tap – or pay it all at once."
+        },
+        "payments": {
+          "label": "Any payment",
+          "title": "Any payment.",
+          "text": "Card, cash, meal vouchers – even combined on a single bill."
+        },
+        "receipts": {
+          "label": "Compliant receipts",
+          "title": "Compliant receipts.",
+          "text": "eKasa is built right into the POS. No need to worry about fiscalisation."
+        },
+        "offline": {
+          "label": "Internet down?",
+          "title": "Internet down?",
+          "text": "Keep selling. The POS syncs everything once it's back online."
+        },
+        "secondDisplay": {
+          "label": "Second display",
+          "title": "The customer sees the total. You see everything else.",
+          "text": "The top display shows the amount due. No turning the device around, no misunderstandings."
+        },
+        "waiter": {
+          "label": "Ordering at the table",
+          "title": "Ordering at the table.",
+          "text": "With the Mobile Waiter module you take the order and the payment right at the guest's table."
+        }
+      }
     }
   },
   "Nav": {
