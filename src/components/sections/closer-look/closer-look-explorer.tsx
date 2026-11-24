@@ -84,7 +84,7 @@ export function CloserLookExplorer({ items, imageAlt, photoAlt }: Props) {
         {/* terminál */}
         <div
           aria-hidden
-          className="pointer-events-none relative h-[28rem] overflow-hidden md:absolute md:inset-y-0 md:right-0 md:left-[38%] md:h-auto"
+          className="pointer-events-none relative h-[28rem] overflow-hidden md:absolute md:inset-y-0 md:right-0 md:left-[42%] md:h-auto"
         >
           <div className="absolute inset-0 grid place-items-center">
             <motion.div
@@ -112,7 +112,7 @@ export function CloserLookExplorer({ items, imageAlt, photoAlt }: Props) {
 
         {/* zoznam */}
         <LayoutGroup>
-          <ul className="relative z-10 flex flex-col items-start gap-3 p-6 md:absolute md:inset-y-0 md:left-0 md:w-[min(26rem,42%)] md:justify-center md:p-10 lg:p-14">
+          <ul className="relative z-10 flex flex-col items-start gap-3 p-6 md:absolute md:inset-y-0 md:left-0 md:w-[min(40rem,52%)] md:justify-center md:p-10 lg:p-14">
             {items.map((item) => {
               const open = item.id === active;
               const panelId = `${baseId}-${item.id}`;
