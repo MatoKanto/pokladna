@@ -9,11 +9,47 @@
       "scrollHint": "Scrolluj",
       "imageAlt": "Platobný terminál Besteron s úvodnou obrazovkou"
     },
-    "intro": {
-      "titleStart": "Pokladňa hovorí.",
-      "titleAccent": "Vaša reč.",
-      "text": "Placeholder text. Obsah ďalších sekcií doplníme pri skladaní homepage.",
-      "cta": "Vyskúšať"
+    "closerLook": {
+      "title": "Pozrite sa bližšie",
+      "imageAlt": "Platobný terminál Besteron",
+      "photoAlt": "Zákazník platí mobilom pri pulte kaviarne",
+      "items": {
+        "tap": {
+          "label": "Ťuk, ťuk, zaplatené",
+          "title": "Ťuk, ťuk, zaplatené.",
+          "text": "Farebné kategórie a vyhľadávanie. Položku nájdete jedným dotykom, nie listovaním."
+        },
+        "split": {
+          "label": "Každý platí za seba?",
+          "title": "Každý platí za seba?",
+          "text": "Žiadny problém. Účet stola rozdelíte jedným dotykom – alebo zaplatíte naraz."
+        },
+        "payments": {
+          "label": "Akákoľvek platba",
+          "title": "Akákoľvek platba.",
+          "text": "Karta, hotovosť, stravné lístky – aj ich kombinácia na jednom účte."
+        },
+        "receipts": {
+          "label": "Doklady podľa zákona",
+          "title": "Doklady podľa zákona.",
+          "text": "eKasa je priamo v pokladni. O fiškalizáciu sa nemusíte starať."
+        },
+        "offline": {
+          "label": "Vypadol internet?",
+          "title": "Vypadol internet?",
+          "text": "Predávate ďalej. Pokladňa všetko dorovná, keď je znova online."
+        },
+        "secondDisplay": {
+          "label": "Druhý displej",
+          "title": "Zákazník vidí sumu. Vy vidíte všetko ostatné.",
+          "text": "Horný displej ukáže sumu na úhradu. Žiadne otáčanie zariadenia, žiadne nedorozumenia."
+        },
+        "waiter": {
+          "label": "Objednávka pri stole",
+          "title": "Objednávka pri stole.",
+          "text": "S modulom Mobilný čašník vybavíte objednávku aj platbu priamo pri hosťovi."
+        }
+      }
     }
   },
   "Nav": {
