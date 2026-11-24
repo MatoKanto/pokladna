@@ -5,10 +5,11 @@ import { Menu, X } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { glass, glassHover, glassItem } from "./glass";
+import { LocaleSwitcher } from "./locale-switcher";
 
 type Props = {
   items: { href: string; label: string }[];
-  labels: { menu: string; close: string };
+  labels: { menu: string; close: string; language: string };
 };
 
 /** Hamburger menu pre šírky pod lg. Desktop navigácia je v SiteHeader. */
@@ -66,6 +67,11 @@ export function MobileMenu({ items, labels }: Props) {
                 {item.label}
               </Link>
             ))}
+            <LocaleSwitcher
+              variant="inline"
+              label={labels.language}
+              onSelect={() => setOpen(false)}
+            />
           </nav>
         </>
       )}
