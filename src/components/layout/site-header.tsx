@@ -3,6 +3,7 @@ import { BesteronLogo } from "@/components/brand/logo";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { glass, glassCta, glassHover, glassItem } from "./glass";
+import { LocaleSwitcher } from "./locale-switcher";
 import { MobileMenu } from "./mobile-menu";
 import { ToneHeader } from "./tone-header";
 
@@ -52,7 +53,7 @@ export async function SiteHeader() {
               href={item.href}
               className={cn(
                 glassItem,
-                "rounded-full px-5 py-2.5 text-sm font-medium transition-colors",
+                "rounded-full px-5 py-2.5 text-sm font-semibold transition-colors",
               )}
             >
               {item.label}
@@ -62,19 +63,20 @@ export async function SiteHeader() {
 
         {/* CTA + mobilné menu */}
         <div className="pointer-events-auto flex items-center gap-2">
+          <LocaleSwitcher label={t("language")} />
           <Link
             href={CONTACT_HREF}
             className={cn(
               glass,
               glassCta,
-              "flex h-11 items-center rounded-full px-5 text-sm font-medium lg:h-14 lg:px-7",
+              "flex h-11 items-center rounded-full px-5 text-sm font-semibold lg:h-14 lg:px-7",
             )}
           >
             {t("contact")}
           </Link>
           <MobileMenu
             items={items}
-            labels={{ menu: t("menu"), close: t("closeMenu") }}
+            labels={{ menu: t("menu"), close: t("closeMenu"), language: t("language") }}
           />
         </div>
       </div>

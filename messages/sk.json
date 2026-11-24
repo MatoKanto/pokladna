@@ -5,9 +5,24 @@
   },
   "Home": {
     "hero": {
-      "title": "Pokladňa, ktorá robí biznis lepším",
+      "title": "Pokladňa, ktorá robí biznis",
       "scrollHint": "Scrolluj",
-      "imageAlt": "Platobný terminál Besteron s úvodnou obrazovkou"
+      "imageAlt": "Platobný terminál Besteron s úvodnou obrazovkou",
+      "titleAccent": "lepším",
+      "features": [
+        {
+          "title": "Karta aj hotovosť",
+          "text": "Terminál je priamo v pokladni."
+        },
+        {
+          "title": "eKasa v cene",
+          "text": "Doklady podľa zákona, bez ďalšej krabičky."
+        },
+        {
+          "title": "Aj bez internetu",
+          "text": "Predávate ďalej, dáta sa dorovnajú samé."
+        }
+      ]
     },
     "closerLook": {
       "title": "Pozrite sa bližšie",
@@ -60,6 +75,7 @@
     },
     "contact": "Kontaktovať",
     "menu": "Menu",
+    "language": "Jazyk",
     "closeMenu": "Zavrieť menu",
     "home": "Besteron, domov",
     "primary": "Hlavná navigácia"

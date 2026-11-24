@@ -5,9 +5,24 @@
   },
   "Home": {
     "hero": {
-      "title": "The POS that makes business better",
+      "title": "The POS that makes business",
       "scrollHint": "Scroll",
-      "imageAlt": "Besteron payment terminal showing the home screen"
+      "imageAlt": "Besteron payment terminal showing the home screen",
+      "titleAccent": "better",
+      "features": [
+        {
+          "title": "Card and cash",
+          "text": "The terminal sits right at the checkout."
+        },
+        {
+          "title": "eKasa included",
+          "text": "Legally compliant receipts, no extra box."
+        },
+        {
+          "title": "Works offline",
+          "text": "Keep selling, the data syncs on its own."
+        }
+      ]
     },
     "closerLook": {
       "title": "Take a closer look",
@@ -60,6 +75,7 @@
     },
     "contact": "Contact us",
     "menu": "Menu",
+    "language": "Language",
     "closeMenu": "Close menu",
     "home": "Besteron, home",
     "primary": "Main navigation"

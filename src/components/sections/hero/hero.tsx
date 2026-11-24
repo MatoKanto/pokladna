@@ -8,8 +8,10 @@ export async function Hero() {
   return (
     <HeroScene
       title={t("title")}
+      titleAccent={t("titleAccent")}
       scrollHint={t("scrollHint")}
       imageAlt={t("imageAlt")}
+      features={t.raw("features") as { title: string; text: string }[]}
     />
   );
 }

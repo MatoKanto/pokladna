@@ -47,5 +47,7 @@
   }
   body {
     @apply bg-background text-foreground font-sans antialiased;
+    /* Používame len rezy Metropolis z brand manuálu; žiadne umelo dopočítané. */
+    font-synthesis: none;
   }
 }
