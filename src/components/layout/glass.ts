@@ -9,7 +9,7 @@
  * Tailwind pri skenovaní nenájde.
  */
 export const glass = [
-  "backdrop-blur-xl backdrop-saturate-150 ring-1 shadow-sm transition-colors duration-300",
+  "backdrop-blur-md backdrop-saturate-150 ring-1 shadow-sm transition-colors duration-300",
   "bg-background/15 text-background ring-background/25",
   "group-data-[tone=light]/header:bg-background/55 group-data-[tone=light]/header:text-foreground group-data-[tone=light]/header:ring-foreground/10",
 ].join(" ");
