@@ -80,7 +80,22 @@
     "language": "Language",
     "closeMenu": "Close menu",
     "home": "Besteron, home",
-    "primary": "Main navigation"
+    "primary": "Main navigation",
+    "login": "Log in",
+    "productMenu": {
+      "pos": {
+        "title": "Besteron POS",
+        "text": "Sales, card payments and receipts in one device."
+      },
+      "waiter": {
+        "title": "Mobile Waiter",
+        "text": "Take the order and the payment right at the table."
+      },
+      "ekasa": {
+        "title": "eKasa included",
+        "text": "Legally compliant receipts, no extra box."
+      }
+    }
   },
   "Footer": {
     "cta": {

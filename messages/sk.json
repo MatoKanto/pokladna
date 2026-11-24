@@ -80,7 +80,22 @@
     "language": "Jazyk",
     "closeMenu": "Zavrieť menu",
     "home": "Besteron, domov",
-    "primary": "Hlavná navigácia"
+    "primary": "Hlavná navigácia",
+    "login": "Prihlásiť sa",
+    "productMenu": {
+      "pos": {
+        "title": "Pokladňa Besteron",
+        "text": "Predaj, platby kartou aj doklady v jednom zariadení."
+      },
+      "waiter": {
+        "title": "Mobilný čašník",
+        "text": "Objednávka aj platba priamo pri stole hosťa."
+      },
+      "ekasa": {
+        "title": "eKasa v cene",
+        "text": "Doklady podľa zákona, bez ďalšej krabičky."
+      }
+    }
   },
   "Footer": {
     "cta": {

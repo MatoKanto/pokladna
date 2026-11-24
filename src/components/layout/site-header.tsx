@@ -1,85 +1,91 @@
 import { getTranslations } from "next-intl/server";
 import { BesteronLogo } from "@/components/brand/logo";
+import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
-import { glass, glassCta, glassHover, glassItem } from "./glass";
+import { DesktopNav, type NavProduct } from "./desktop-nav";
+import { glass, glassItem } from "./glass";
 import { LocaleSwitcher } from "./locale-switcher";
 import { MobileMenu } from "./mobile-menu";
-import { ToneHeader } from "./tone-header";
 
+// Štruktúra podľa shadcnblocks navbar8 (Pro blok, prepísaný ručne):
+// logo vľavo, mega dropdown s prelínaním obrázkov, akcie vpravo.
 // Hrefy sú zatiaľ kotvy na homepage; nahradíme reálnymi stránkami.
-const NAV_ITEMS = [
-  { key: "products", href: "/#produkty" },
+const PRODUCTS = [
+  { key: "pos", href: "/#produkty", image: "/images/terminal.webp", fit: "contain" },
+  { key: "waiter", href: "/#produkty", image: "/images/cafe.jpg", fit: "cover" },
+  { key: "ekasa", href: "/#produkty", image: "/images/terminal-seq/040.webp", fit: "contain" },
+] as const;
+
+const LINKS = [
   { key: "about", href: "/#o-nas" },
   { key: "blog", href: "/#blog" },
 ] as const;
 
+// TODO: doplniť skutočnú adresu prihlásenia do Besteron portálu.
+const LOGIN_HREF = "/#prihlasenie";
 const CONTACT_HREF = "/#kontakt";
 
 export async function SiteHeader() {
   const t = await getTranslations("Nav");
-  const items = NAV_ITEMS.map(({ key, href }) => ({
-    href,
-    label: t(`items.${key}`),
+
+  const products: NavProduct[] = PRODUCTS.map(({ key, ...rest }) => ({
+    ...rest,
+    title: t(`productMenu.${key}.title`),
+    text: t(`productMenu.${key}.text`),
   }));
+  const links = LINKS.map(({ key, href }) => ({ href, label: t(`items.${key}`) }));
 
   return (
-    <ToneHeader className="group/header pointer-events-none fixed inset-x-0 top-3 z-50 px-3 lg:top-4 lg:px-8">
-      <div className="relative flex items-center justify-between">
-        {/* logo */}
-        <Link
-          href="/"
-          aria-label={t("home")}
-          className={cn(
-            glass,
-            glassHover,
-            "pointer-events-auto flex h-11 items-center rounded-full px-5 lg:h-14 lg:px-6",
-          )}
-        >
-          <BesteronLogo className="h-5 w-auto lg:h-6" />
+    <header className="fixed inset-x-0 top-3 z-50 px-3 lg:top-4 lg:px-6">
+      <div
+        className={cn(
+          glass,
+          "mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 rounded-full pl-5 pr-2 lg:h-16 lg:pl-7",
+        )}
+      >
+        <Link href="/" aria-label={t("home")} className="shrink-0">
+          <BesteronLogo className="h-5 w-auto text-primary lg:h-6" />
         </Link>
 
-        {/* stredná navigácia (desktop) */}
-        <nav
-          aria-label={t("primary")}
-          className={cn(
-            glass,
-            "pointer-events-auto absolute left-1/2 hidden -translate-x-1/2 items-center gap-1 rounded-full p-1.5 lg:flex",
-          )}
-        >
-          {items.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                glassItem,
-                "rounded-full px-5 py-2.5 text-sm font-semibold transition-colors",
-              )}
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
+        <DesktopNav
+          label={t("primary")}
+          productsLabel={t("items.products")}
+          products={products}
+          links={links}
+        />
 
-        {/* CTA + mobilné menu */}
-        <div className="pointer-events-auto flex items-center gap-2">
-          <LocaleSwitcher label={t("language")} />
+        <div className="flex items-center gap-1">
           <Link
-            href={CONTACT_HREF}
+            href={LOGIN_HREF}
             className={cn(
-              glass,
-              glassCta,
-              "flex h-11 items-center rounded-full px-5 text-sm font-semibold lg:h-14 lg:px-7",
+              glassItem,
+              "hidden h-11 items-center rounded-full px-4 text-sm font-semibold transition-colors lg:flex",
             )}
           >
-            {t("contact")}
+            {t("login")}
           </Link>
+          <Button asChild className="h-10 rounded-full px-5 lg:h-11 lg:px-6">
+            <Link href={CONTACT_HREF}>{t("contact")}</Link>
+          </Button>
+          <LocaleSwitcher label={t("language")} />
           <MobileMenu
-            items={items}
-            labels={{ menu: t("menu"), close: t("closeMenu"), language: t("language") }}
+            products={products}
+            productsLabel={t("items.products")}
+            links={links}
+            loginHref={LOGIN_HREF}
+            contactHref={CONTACT_HREF}
+            labels={{
+              menu: t("menu"),
+              close: t("closeMenu"),
+              language: t("language"),
+              login: t("login"),
+              contact: t("contact"),
+              home: t("home"),
+            }}
           />
         </div>
       </div>
-    </ToneHeader>
+    </header>
   );
 }

@@ -7,7 +7,7 @@ import { usePathname, useRouter } from "@/i18n/navigation";
 import { LOCALE_META } from "@/i18n/locales";
 import { routing, type Locale } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
-import { glass, glassHover, glassItem } from "./glass";
+import { glassItem, glassPanel } from "./glass";
 
 type Props = {
   label: string;
@@ -85,9 +85,8 @@ export function LocaleSwitcher({ label, variant = "dropdown", onSelect }: Props)
         aria-label={label}
         onClick={() => setOpen((v) => !v)}
         className={cn(
-          glass,
-          glassHover,
-          "flex h-14 items-center gap-2 rounded-full px-5 text-sm font-semibold",
+          glassItem,
+          "flex h-11 items-center gap-1.5 rounded-full px-4 text-sm font-semibold transition-colors",
         )}
       >
         <Globe className="size-4" />
@@ -98,8 +97,8 @@ export function LocaleSwitcher({ label, variant = "dropdown", onSelect }: Props)
           role="listbox"
           aria-label={label}
           className={cn(
-            glass,
-            "absolute right-0 top-full mt-2 max-h-80 w-56 overflow-y-auto rounded-3xl p-2",
+            glassPanel,
+            "absolute right-0 top-full mt-3 max-h-80 w-56 overflow-y-auto rounded-3xl p-2",
           )}
         >
           {options}

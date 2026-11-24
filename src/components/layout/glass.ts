@@ -1,27 +1,17 @@
 /**
- * Glassmorphism pilulky hlavičky: priesvitné, rozmazané pozadie pod nimi.
- *
- * Tón sa prepína podľa sekcie pod hlavičkou (`data-tone` na <header>, pozri ToneHeader):
- *  - predvolený (dark): tmavé/farebné pozadie → svetlé sklo, biely text
- *  - light: svetlé pozadie → svetlejšie sklo, tmavý text
- *
- * POZOR: triedy musia byť napísané doslovne (nie skladané cez template), inak ich
- * Tailwind pri skenovaní nenájde.
+ * Glassmorphism hlavičky: svetlé matné sklo, ktoré rozmaže obsah pod sebou.
+ * Svetlé sklo drží kontrast pre červené logo aj tmavý text nad červeným hero
+ * aj nad svetlými sekciami, takže netreba prepínať tón podľa sekcie.
  */
-export const glass = [
-  "backdrop-blur-md backdrop-saturate-150 ring-1 shadow-sm transition-colors duration-300",
-  "bg-background/15 text-background ring-background/25",
-  "group-data-[tone=light]/header:bg-background/55 group-data-[tone=light]/header:text-foreground group-data-[tone=light]/header:ring-foreground/10",
-].join(" ");
+export const glass =
+  "bg-background/60 text-foreground ring-1 ring-foreground/10 shadow-lg shadow-foreground/5 backdrop-blur-xl backdrop-saturate-150";
 
-/** Hover pre pilulky, ktoré sú samy odkazom/tlačidlom (logo, hamburger). */
-export const glassHover =
-  "hover:bg-background/25 group-data-[tone=light]/header:hover:bg-background/80";
+/**
+ * Plávajúce panely (dropdowny). Sú vnorené v skle hlavičky, a vnorený
+ * backdrop-filter nerozmaže stránku pod hlavičkou, preto sú takmer nepriehľadné.
+ */
+export const glassPanel =
+  "bg-background/95 text-foreground ring-1 ring-foreground/10 shadow-xl shadow-foreground/10 backdrop-blur-xl backdrop-saturate-150";
 
-/** Hover pre položky vo vnútri pilulky (navigácia, menu). */
-export const glassItem =
-  "hover:bg-background/20 group-data-[tone=light]/header:hover:bg-foreground/10";
-
-/** CTA: pri hover sa vyplní plnou farbou. */
-export const glassCta =
-  "hover:bg-background hover:text-foreground group-data-[tone=light]/header:hover:bg-foreground group-data-[tone=light]/header:hover:text-background";
+/** Hover pre položky na skle; `current` funguje na svetlom skle aj na červenom paneli. */
+export const glassItem = "hover:bg-current/10 focus-visible:bg-current/10";
