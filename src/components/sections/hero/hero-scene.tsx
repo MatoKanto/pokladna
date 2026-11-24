@@ -104,6 +104,11 @@ function HeroAnimated({
   const titleScale = useTransform(p, [0, 0.1], [1, 0.94]);
   const hintOpacity = useTransform(p, [0, 0.05], [1, 0]);
 
+  // Keď hero dosiahne koniec (p = 1), je pripnutá scéna úplne zakrytá ďalšou sekciou.
+  // Skryjeme ju, inak prehliadač naďalej spracúva jej veľké vrstvy (terminál, sklo,
+  // rozmazanie) a preklikávanie v sekciách nižšie sekáva.
+  const stageVisibility = useTransform(p, (v) => (v >= 0.995 ? "hidden" : "visible"));
+
   // Veľkosť okna a terminálu (výška = 74svh na desktope, 68svh na mobile)
   const vw = useMotionValue(0);
   const vh = useMotionValue(0);
@@ -172,8 +177,16 @@ function HeroAnimated({
       py.set(e.clientY / window.innerHeight);
     };
     window.addEventListener("pointermove", onMove);
+    // Mimo obrazovky sa nič nepočíta (inak by nekonečná animácia reflektora bežala
+    // každý snímok aj pod ďalšími sekciami a spomaľovala ich)
+    const el = ref.current;
+    const io = new IntersectionObserver(([entry]) => {
+      idle.forEach((a) => (entry.isIntersecting ? a.play() : a.pause()));
+    });
+    if (el) io.observe(el);
     return () => {
       idle.forEach((a) => a.stop());
+      io.disconnect();
       window.removeEventListener("pointermove", onMove);
     };
   }, [px, py]);
@@ -197,7 +210,10 @@ function HeroAnimated({
       data-header-theme="dark"
       className={`relative ${HERO_HEIGHT}`}
     >
-      <div className="sticky top-0 h-svh overflow-hidden bg-foreground">
+      <motion.div
+        style={{ visibility: stageVisibility }}
+        className="sticky top-0 h-svh overflow-hidden bg-foreground"
+      >
         {/* pozadie */}
         <motion.div
           style={{ opacity: stageOpacity }}
@@ -291,7 +307,7 @@ function HeroAnimated({
             </motion.div>
           </motion.div>
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 }

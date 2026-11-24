@@ -122,8 +122,10 @@ export function CloserLookExplorer({ items, imageAlt, photoAlt }: Props) {
                   layout
                   style={{ borderRadius: open ? 28 : 999 }}
                   className={cn(
-                    "overflow-hidden bg-foreground/[0.06] backdrop-blur-xl transition-colors duration-500",
-                    photo && "md:bg-background/75",
+                    // Bez backdrop-blur: pri každej animácii rozloženia by sa prepočítaval
+                    // a sekal; na fotke stačí takmer plné pozadie.
+                    "overflow-hidden bg-foreground/[0.06]",
+                    photo && "md:bg-background/90",
                     open && "w-full",
                   )}
                 >
@@ -151,7 +153,7 @@ export function CloserLookExplorer({ items, imageAlt, photoAlt }: Props) {
                       type="button"
                       aria-expanded={false}
                       onClick={() => setActive(item.id)}
-                      className="flex items-center gap-3 rounded-full py-3.5 pr-6 pl-3.5 text-[0.95rem] font-medium whitespace-nowrap transition-colors hover:bg-foreground/[0.05] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none md:text-base"
+                      className="flex cursor-pointer items-center gap-3 rounded-full py-3.5 pr-6 pl-3.5 text-[0.95rem] font-medium whitespace-nowrap transition-colors hover:bg-foreground/[0.05] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none md:text-base"
                     >
                       <span className="grid size-6 place-items-center rounded-full ring-[1.5px] ring-foreground/80">
                         <Plus className="size-3.5" strokeWidth={2.5} />
