@@ -12,10 +12,19 @@ export const sequenceSrc = (i: number) =>
 
 const clamp01 = (x: number) => Math.min(1, Math.max(0, x));
 
+/** Okno dekódovaných snímok okolo aktuálnej (zvyšok ostáva len ako stiahnutý súbor). */
+const KEEP_BEHIND = 4;
+const KEEP_AHEAD = 10;
+
 /**
  * Terminál ako sekvencia snímok (360° video → priehľadné WebP, pozri
  * scripts/terminal-sequence). `progress` (0 až 1) určuje, ktorá snímka sa kreslí;
  * medzi susednými snímkami sa prelína, takže pohyb je plynulý.
+ *
+ * Výkon: všetkých 76 snímok dekódovaných naraz by zaberalo stovky MB a prehliadač by
+ * ich vyhadzoval z cache (dekódovanie pri každom kreslení = sekanie). Preto sa
+ * stiahnu ako súbory (Blob) a ako ImageBitmap sa dekódujú len v okne okolo aktuálnej
+ * snímky; ostatné sa uvoľnia.
  */
 export function TerminalSequence({
   progress,
@@ -27,11 +36,14 @@ export function TerminalSequence({
   className?: string;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const images = useRef<(HTMLImageElement | undefined)[]>([]);
+  const blobs = useRef<(Blob | undefined)[]>([]);
+  const bitmaps = useRef<(ImageBitmap | undefined)[]>([]);
+  const pending = useRef<Set<number>>(new Set());
+  const lastKey = useRef("");
 
-  /** Najbližšia už načítaná snímka (kým sa ostatné doťahujú). */
+  /** Najbližšia dostupná dekódovaná snímka. */
   const pick = (i: number) => {
-    const list = images.current;
+    const list = bitmaps.current;
     for (let d = 0; d < FRAME_COUNT; d++) {
       if (list[i - d]) return list[i - d];
       if (list[i + d]) return list[i + d];
@@ -39,7 +51,7 @@ export function TerminalSequence({
     return undefined;
   };
 
-  const draw = useCallback(() => {
+  const draw = useCallback(function redraw() {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
     if (!canvas || !ctx) return;
@@ -47,11 +59,39 @@ export function TerminalSequence({
     const i0 = Math.floor(v);
     const f = v - i0;
     const i1 = Math.min(i0 + 1, FRAME_COUNT - 1);
+
+    // dekódovať okno okolo aktuálnej snímky, vzdialené uvoľniť
+    const lo = Math.max(0, i0 - KEEP_BEHIND);
+    const hi = Math.min(FRAME_COUNT - 1, i1 + KEEP_AHEAD);
+    for (let i = 0; i < FRAME_COUNT; i++) {
+      if (i >= lo && i <= hi) {
+        const blob = blobs.current[i];
+        if (blob && !bitmaps.current[i] && !pending.current.has(i)) {
+          pending.current.add(i);
+          createImageBitmap(blob)
+            .then((bm) => {
+              pending.current.delete(i);
+              bitmaps.current[i] = bm;
+              redraw();
+            })
+            .catch(() => pending.current.delete(i));
+        }
+      } else if (bitmaps.current[i]) {
+        bitmaps.current[i]?.close();
+        bitmaps.current[i] = undefined;
+      }
+    }
+
     const a = pick(i0);
-    const b = pick(i1);
+    const b = f > 0.02 ? pick(i1) : undefined;
+    // nekresliť znova, ak sa nič nezmenilo (rovnaké snímky a miešanie)
+    const key = `${i0}|${f > 0.02 ? f.toFixed(2) : 0}|${a ? 1 : 0}${b ? 1 : 0}|${canvas.width}`;
+    if (key === lastKey.current && a) return;
+    lastKey.current = key;
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     if (a) ctx.drawImage(a, 0, 0, canvas.width, canvas.height);
-    if (b && b !== a && f > 0.01) {
+    if (b && b !== a) {
       ctx.globalAlpha = f;
       ctx.drawImage(b, 0, 0, canvas.width, canvas.height);
       ctx.globalAlpha = 1;
@@ -60,28 +100,35 @@ export function TerminalSequence({
 
   useMotionValueEvent(progress, "change", draw);
 
-  // Načítanie snímok (prvá ako prvá) a prekreslenie po každej načítanej
+  // Stiahnutie snímok (prvá a posledná ako prvé) ako Blob; dekódovanie rieši draw()
   useEffect(() => {
-    const list = images.current;
     let cancelled = false;
-    const load = (i: number) => {
-      const img = new Image();
-      img.decoding = "async";
-      img.onload = () => {
+    const order = [
+      0,
+      FRAME_COUNT - 1,
+      ...Array.from({ length: FRAME_COUNT - 2 }, (_, k) => k + 1),
+    ];
+    const load = async (i: number) => {
+      try {
+        const res = await fetch(sequenceSrc(i));
+        const blob = await res.blob();
         if (cancelled) return;
-        list[i] = img;
+        blobs.current[i] = blob;
         draw();
-      };
-      img.src = sequenceSrc(i);
+      } catch {
+        /* snímka sa preskočí, kreslí sa najbližšia dostupná */
+      }
     };
-    load(0);
-    load(FRAME_COUNT - 1);
-    const t = window.setTimeout(() => {
-      for (let i = 1; i < FRAME_COUNT - 1; i++) load(i);
-    }, 0);
+    // pár súbežných sťahovaní, nech nezahltia sieť
+    let next = 0;
+    const worker = async () => {
+      while (!cancelled && next < order.length) await load(order[next++]);
+    };
+    for (let w = 0; w < 4; w++) void worker();
+    const bms = bitmaps.current;
     return () => {
       cancelled = true;
-      window.clearTimeout(t);
+      bms.forEach((bm) => bm?.close());
     };
   }, [draw]);
 

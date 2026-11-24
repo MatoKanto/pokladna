@@ -104,6 +104,11 @@ function HeroAnimated({
   const titleScale = useTransform(p, [0, 0.1], [1, 0.94]);
   const hintOpacity = useTransform(p, [0, 0.05], [1, 0]);
 
+  // Keď hero dosiahne koniec (p = 1), je pripnutá scéna úplne zakrytá ďalšou sekciou.
+  // Skryjeme ju, inak prehliadač naďalej spracúva jej veľké vrstvy (terminál, sklo,
+  // rozmazanie) a preklikávanie v sekciách nižšie sekáva.
+  const stageVisibility = useTransform(p, (v) => (v >= 0.995 ? "hidden" : "visible"));
+
   // Veľkosť okna a terminálu (výška = 74svh na desktope, 68svh na mobile)
   const vw = useMotionValue(0);
   const vh = useMotionValue(0);
@@ -172,15 +177,28 @@ function HeroAnimated({
       py.set(e.clientY / window.innerHeight);
     };
     window.addEventListener("pointermove", onMove);
+    // Mimo obrazovky sa nič nepočíta (inak by nekonečná animácia reflektora bežala
+    // každý snímok aj pod ďalšími sekciami a spomaľovala ich)
+    const el = ref.current;
+    const io = new IntersectionObserver(([entry]) => {
+      idle.forEach((a) => (entry.isIntersecting ? a.play() : a.pause()));
+    });
+    if (el) io.observe(el);
     return () => {
       idle.forEach((a) => a.stop());
+      io.disconnect();
       window.removeEventListener("pointermove", onMove);
     };
   }, [px, py]);
+  // Reflektor: statický gradient, ktorý sa len posúva (transform = bez prekresľovania)
   const spotX = useTransform(sx, (v) => v * 100);
   const spotY = useTransform(sy, (v) => v * 100);
-  const spotlight = useMotionTemplate`radial-gradient(45vmax circle at ${spotX}% ${spotY}%, color-mix(in oklch, var(--primary-foreground) 15%, transparent), transparent 62%)`;
+  const spotlight = useMotionTemplate`translate3d(calc(${spotX}vw - 50%), calc(${spotY}vh - 50%), 0)`;
   const introLightOpacity = useTransform(p, [0, 0.14], [1, 0]);
+  // Prvky, ktoré už nie sú vidieť, sa prestanú vykresľovať (visibility: hidden)
+  const introLightVis = useTransform(p, (v) => (v < 0.14 ? "visible" : "hidden"));
+  const titleVis = useTransform(p, (v) => (v < 0.1 ? "visible" : "hidden"));
+  const glassVis = useTransform(p, (v) => (v < 0.4 ? "visible" : "hidden"));
 
   // Sklo displeja: drží sa, kým je pohľad takmer čelný, potom sa rozplynie do UI
   const glassOpacity = useTransform(p, [0.2, 0.4], [1, 0]);
@@ -197,7 +215,10 @@ function HeroAnimated({
       data-header-theme="dark"
       className={`relative ${HERO_HEIGHT}`}
     >
-      <div className="sticky top-0 h-svh overflow-hidden bg-foreground">
+      <motion.div
+        style={{ visibility: stageVisibility }}
+        className="sticky top-0 h-svh overflow-hidden bg-foreground"
+      >
         {/* pozadie */}
         <motion.div
           style={{ opacity: stageOpacity }}
@@ -213,16 +234,19 @@ function HeroAnimated({
         {/* úvodné sklo: reflektor pod kurzorom a občasný prejazd svetla */}
         <motion.div
           aria-hidden
-          style={{ opacity: introLightOpacity }}
+          style={{ opacity: introLightOpacity, visibility: introLightVis }}
           className="pointer-events-none absolute inset-0 z-[5] overflow-hidden"
         >
-          <motion.div style={{ background: spotlight }} className="absolute inset-0" />
+          <motion.div
+            style={{ transform: spotlight }}
+            className="absolute top-0 left-0 size-[90vmax] will-change-transform [background:radial-gradient(circle_at_center,color-mix(in_oklch,var(--primary-foreground)_15%,transparent),transparent_62%)]"
+          />
           <div className="glint absolute -inset-y-[10%] left-0 w-[22vw]" />
         </motion.div>
 
         {/* nadpis + hint (hint hneď pod nadpisom ako pri Cleo) */}
         <motion.div
-          style={{ opacity: titleOpacity, filter: titleBlur, scale: titleScale }}
+          style={{ opacity: titleOpacity, filter: titleBlur, scale: titleScale, visibility: titleVis }}
           className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-16 px-6 text-center md:gap-24"
         >
           <h1 className="max-w-3xl text-4xl font-extrabold tracking-tight text-background md:text-6xl">
@@ -277,6 +301,7 @@ function HeroAnimated({
               aria-hidden
               style={{
                 opacity: glassOpacity,
+                visibility: glassVis,
                 left: `${SCREEN.left * 100}%`,
                 top: `${SCREEN.top * 100}%`,
                 width: `${(SCREEN.right - SCREEN.left) * 100}%`,
@@ -291,7 +316,7 @@ function HeroAnimated({
             </motion.div>
           </motion.div>
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 }
@@ -334,10 +359,11 @@ function FeatureCard({
     return fadeIn * (1 - clamp01((pv - next) / 0.04)); // mobil: ustúpi ďalšej karte
   });
   const y = useTransform(p, (pv) => 28 * (1 - clamp01((pv - from) / 0.05)));
+  const visibility = useTransform(p, (pv) => (pv > from - 0.01 ? "visible" : "hidden"));
   return (
     <motion.div
-      style={{ opacity, y }}
-      className={`pointer-events-none absolute inset-x-5 bottom-6 z-10 rounded-3xl bg-background/15 px-6 py-5 text-background shadow-[0_8px_32px_-8px] shadow-foreground/30 ring-1 ring-background/30 backdrop-blur-xl backdrop-saturate-150 lg:inset-x-auto lg:bottom-auto lg:w-[17rem] lg:py-6 ${CARD_POS[index] ?? ""}`}
+      style={{ opacity, y, visibility }}
+      className={`pointer-events-none absolute inset-x-5 bottom-6 z-10 rounded-3xl bg-background/20 px-6 py-5 text-background shadow-[0_8px_32px_-8px] shadow-foreground/30 ring-1 ring-background/30 lg:inset-x-auto lg:bottom-auto lg:w-[17rem] lg:py-6 ${CARD_POS[index] ?? ""}`}
     >
       {/* jemný odlesk na hrane skla */}
       <div
@@ -380,7 +406,7 @@ function HeroStatic({ title, titleAccent, imageAlt, features }: Props) {
           {features.map((f) => (
             <li
               key={f.title}
-              className="rounded-3xl bg-background/15 px-5 py-4 ring-1 ring-background/30 backdrop-blur-xl"
+              className="rounded-3xl bg-background/15 px-5 py-4 ring-1 ring-background/30"
             >
               <h2 className="text-xl font-extrabold tracking-tight">{f.title}</h2>
               <p className="mt-1 text-sm text-background/85">{f.text}</p>
