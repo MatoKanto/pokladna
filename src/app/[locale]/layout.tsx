@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { SiteHeader } from "@/components/layout/site-header";
+import { getPathname } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import "@/styles/globals.css";
 
@@ -32,7 +33,15 @@ export async function generateMetadata({
 }: LayoutProps<"/[locale]">): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "Meta" });
-  return { title: t("title"), description: t("description") };
+  return {
+    title: t("title"),
+    description: t("description"),
+    alternates: {
+      languages: Object.fromEntries(
+        routing.locales.map((l) => [l, getPathname({ locale: l, href: "/" })]),
+      ),
+    },
+  };
 }
 
 export default async function LocaleLayout({

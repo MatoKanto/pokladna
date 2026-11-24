@@ -3,6 +3,7 @@ import { BesteronLogo } from "@/components/brand/logo";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { glass, glassCta, glassHover, glassItem } from "./glass";
+import { LocaleSwitcher } from "./locale-switcher";
 import { MobileMenu } from "./mobile-menu";
 import { ToneHeader } from "./tone-header";
 
@@ -62,6 +63,7 @@ export async function SiteHeader() {
 
         {/* CTA + mobilné menu */}
         <div className="pointer-events-auto flex items-center gap-2">
+          <LocaleSwitcher label={t("language")} />
           <Link
             href={CONTACT_HREF}
             className={cn(
@@ -74,7 +76,7 @@ export async function SiteHeader() {
           </Link>
           <MobileMenu
             items={items}
-            labels={{ menu: t("menu"), close: t("closeMenu") }}
+            labels={{ menu: t("menu"), close: t("closeMenu"), language: t("language") }}
           />
         </div>
       </div>
